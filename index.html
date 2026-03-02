@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1689 Heritage Trail — Particular Baptist History in England</title>
+    <meta
+      name="description"
+      content="An interactive historical atlas tracing the Particular Baptist heritage across England and Wales — from the first churches to the Metropolitan Tabernacle, centered on the 1689 Second London Baptist Confession of Faith."
+    />
+
+    <!-- ArcGIS Maps SDK 5.0 -->
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.31/esri/themes/dark/main.css"
+    />
+
+    <!-- Calcite Design System -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://js.arcgis.com/calcite-components/2.13.2/calcite.css"
+    />
+    <script
+      type="module"
+      src="https://js.arcgis.com/calcite-components/2.13.2/calcite.esm.js"
+    ></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+
+  <body class="calcite-mode-dark">
+    <calcite-shell>
+      <!-- ========== HEADER ========== -->
+      <calcite-navigation slot="header">
+        <div slot="content-start" class="header-brand">
+          <span class="cross-icon">&#10013;</span>
+          <div class="header-text">
+            <span class="header-title">1689 Heritage Trail</span>
+            <span class="header-subtitle"
+              >Particular Baptist History in England</span
+            >
+          </div>
+        </div>
+        <div slot="content-end" class="header-actions">
+          <calcite-button
+            id="btnTimeline"
+            appearance="transparent"
+            icon-start="clock"
+            kind="neutral"
+            scale="s"
+            >Timeline</calcite-button
+          >
+          <calcite-button
+            id="btnFigures"
+            appearance="transparent"
+            icon-start="users"
+            kind="neutral"
+            scale="s"
+            >Figures</calcite-button
+          >
+          <calcite-button
+            id="btnAbout"
+            appearance="transparent"
+            icon-start="information"
+            kind="neutral"
+            scale="s"
+            >About</calcite-button
+          >
+        </div>
+      </calcite-navigation>
+
+      <!-- ========== ERA SELECTOR BAR ========== -->
+      <div id="eraBar">
+        <div class="era-chips">
+          <button class="era-chip active" data-era="all">All Eras</button>
+          <button class="era-chip" data-era="1">
+            <span class="chip-dot" style="background: #c9a84c"></span>
+            Origins (1612–1644)
+          </button>
+          <button class="era-chip" data-era="2">
+            <span class="chip-dot" style="background: #8a4f7d"></span>
+            Persecution (1644–1689)
+          </button>
+          <button class="era-chip" data-era="3">
+            <span class="chip-dot" style="background: #568259"></span>
+            Toleration (1689–1792)
+          </button>
+          <button class="era-chip" data-era="4">
+            <span class="chip-dot" style="background: #a34b4b"></span>
+            Mission (1792–1892)
+          </button>
+        </div>
+      </div>
+
+      <!-- ========== MAP CONTAINER ========== -->
+      <div id="viewDiv"></div>
+
+      <!-- ========== BOTTOM SHEET (Location Details) ========== -->
+      <div id="bottomSheet" class="hidden">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header">
+          <div class="sheet-title-row">
+            <h2 id="sheetTitle"></h2>
+            <button id="sheetClose" class="sheet-close-btn">&times;</button>
+          </div>
+          <p id="sheetSubtitle" class="sheet-subtitle"></p>
+        </div>
+        <div id="sheetContent" class="sheet-content"></div>
+      </div>
+
+      <!-- ========== TIMELINE PANEL ========== -->
+      <div id="timelinePanel" class="side-panel hidden">
+        <div class="panel-header">
+          <h2>Historical Timeline</h2>
+          <button class="panel-close-btn" data-panel="timelinePanel">
+            &times;
+          </button>
+        </div>
+        <div id="timelineContent" class="panel-content"></div>
+      </div>
+
+      <!-- ========== FIGURES PANEL ========== -->
+      <div id="figuresPanel" class="side-panel hidden">
+        <div class="panel-header">
+          <h2>Key Figures</h2>
+          <button class="panel-close-btn" data-panel="figuresPanel">
+            &times;
+          </button>
+        </div>
+        <div id="figuresContent" class="panel-content"></div>
+      </div>
+
+      <!-- ========== ABOUT OVERLAY ========== -->
+      <div id="aboutOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <div class="overlay-header">
+            <span class="cross-icon large">&#10013;</span>
+            <h2>About This Map</h2>
+          </div>
+          <div class="overlay-body">
+            <p>
+              <strong>1689 Heritage Trail</strong> is an interactive historical
+              atlas tracing the story of the Particular Baptists across England
+              and Wales — from the emergence of the first congregations in the
+              1630s through the era of Spurgeon and the Metropolitan Tabernacle.
+            </p>
+            <p>
+              The map is centered on the
+              <strong>1689 Second London Baptist Confession of Faith</strong>,
+              the defining confessional document of the Particular (Reformed)
+              Baptist tradition. Drafted secretly in 1677 by Nehemiah Coxe and
+              William Collins during fierce persecution, it was publicly adopted
+              by over 100 churches after the Toleration Act of 1689.
+            </p>
+            <h3>Four Eras</h3>
+            <ul>
+              <li>
+                <span style="color: #c9a84c">&#9632;</span>
+                <strong>Origins (1612–1644)</strong> — First churches and the
+                1644 Confession
+              </li>
+              <li>
+                <span style="color: #8a4f7d">&#9632;</span>
+                <strong>Persecution (1644–1689)</strong> — The Clarendon Code and
+                secret confession-making
+              </li>
+              <li>
+                <span style="color: #568259">&#9632;</span>
+                <strong>Toleration (1689–1792)</strong> — Public confession and
+                institutional growth
+              </li>
+              <li>
+                <span style="color: #a34b4b">&#9632;</span>
+                <strong>Mission (1792–1892)</strong> — Global mission and the
+                Prince of Preachers
+              </li>
+            </ul>
+            <h3>Sources</h3>
+            <p>
+              Historical data compiled from the
+              <a
+                href="https://pettyfrance.wordpress.com/"
+                target="_blank"
+                rel="noopener"
+                >Petty France</a
+              >
+              blog, the Baptist Historical Society, B.R. White's scholarship,
+              Wikipedia, and numerous other primary and secondary sources.
+            </p>
+            <p class="muted">
+              Built with ArcGIS Maps SDK and Calcite Design System.
+            </p>
+          </div>
+          <div class="overlay-footer">
+            <calcite-button
+              id="aboutClose"
+              appearance="outline-fill"
+              kind="neutral"
+              width="full"
+              >Close</calcite-button
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SPLASH SCREEN ========== -->
+      <div id="splashScreen">
+        <div class="splash-content">
+          <span class="cross-icon glow">&#10013;</span>
+          <h1>1689 Heritage Trail</h1>
+          <p class="splash-subtitle">
+            Particular Baptist History in England & Wales
+          </p>
+          <div class="splash-loader">
+            <div class="loader-bar"></div>
+          </div>
+          <p class="splash-hint">Loading map...</p>
+        </div>
+      </div>
+    </calcite-shell>
+
+    <!-- ========== APP MODULE ========== -->
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
