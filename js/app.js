@@ -301,11 +301,106 @@ async function initMap() {
     });
   }
 
+  // ============================================================
+  // Zoom-Based Labeling with Collision Detection
+  // ============================================================
+
+  // London bounding box — locations in this cluster need higher zoom to show labels
+  const LONDON_BOX = { latMin: 51.48, latMax: 51.53, lngMin: -0.13, lngMax: -0.04 };
+
+  function isInLondon(loc) {
+    return loc.lat >= LONDON_BOX.latMin && loc.lat <= LONDON_BOX.latMax &&
+           loc.lng >= LONDON_BOX.lngMin && loc.lng <= LONDON_BOX.lngMax;
+  }
+
+  // Priority for label display (lower = more important, shown first)
+  // These specific IDs are the "hero" locations that represent each cluster
+  const LABEL_PRIORITY = {
+    "metropolitan-tabernacle": 1,  // iconic, slightly offset south of London cluster
+    "broadmead-bristol": 1,        // isolated in the west
+    "bunyan-bedford": 1,           // isolated north
+    "kettering": 1,                // isolated NE
+    "hill-cliffe": 1,              // isolated NW
+    "kelvedon": 2,                 // isolated east
+    "colchester": 2,               // isolated east
+    "llanwenarth": 2,              // isolated Wales
+    "olchon-valley": 2,            // isolated Wales border
+    "knocklas": 2,                 // isolated Wales
+    "cawkwell": 2,                 // isolated Lincolnshire
+    "leicester": 2,                // isolated midlands
+    "waterbeach": 2,               // isolated east
+    "abergavenny": 2,              // isolated Wales
+  };
+
+  /**
+   * Determine the minimum zoom level at which a location's label should appear.
+   * This prevents clutter at wide zoom and progressively reveals labels as you zoom in.
+   */
+  function getLabelMinZoom(loc) {
+    const priority = LABEL_PRIORITY[loc.id];
+    // Priority 1 = hero labels, always visible from zoom 6
+    if (priority === 1) return 6;
+    // Priority 2 = isolated non-London locations, show from zoom 7
+    if (priority === 2) return 7;
+
+    const inLondon = isInLondon(loc);
+
+    if (inLondon) {
+      // London cluster: stagger labels by significance
+      if (loc.significance === "major") return 9;
+      if (loc.significance === "moderate") return 10;
+      return 11;
+    }
+
+    // Non-London, no special priority
+    if (loc.significance === "major") return 7;
+    if (loc.significance === "moderate") return 8;
+    return 10;
+  }
+
+  /**
+   * Screen-space collision detection.
+   * Given a list of candidate labels (sorted by priority), returns only those
+   * whose bounding boxes don't overlap with already-placed labels.
+   */
+  function deconflictLabels(candidates) {
+    const placed = []; // array of { x, y, w, h } screen-space boxes
+
+    return candidates.filter((c) => {
+      const screenPt = view.toScreen(new Point({ longitude: c.lng, latitude: c.lat }));
+      if (!screenPt) return false;
+
+      // Estimate label bounding box in pixels
+      const charWidth = c.fontSize * 0.55;
+      const w = c.text.length * charWidth + 12; // +padding
+      const h = c.fontSize + 6;
+      const x = screenPt.x - w / 2;
+      const y = screenPt.y - c.yoffset - h;
+
+      const box = { x, y, w, h };
+
+      // Check overlap against all placed labels
+      const overlaps = placed.some((p) =>
+        box.x < p.x + p.w && box.x + box.w > p.x &&
+        box.y < p.y + p.h && box.y + box.h > p.y
+      );
+
+      if (!overlaps) {
+        placed.push(box);
+        return true;
+      }
+      return false;
+    });
+  }
+
   // Draw Locations
   function drawLocations() {
     cityLayer.removeAll();
     labelLayer.removeAll();
 
+    const zoom = view.zoom;
+
+    // First pass: draw all markers (always visible)
     locations.forEach((loc) => {
       if (activeEra !== "all" && !loc.eras.includes(activeEra)) return;
 
@@ -358,29 +453,67 @@ async function initMap() {
           attributes: { locId: loc.id, type: "stopNumber" },
         }));
       }
+    });
 
-      // Location name label — dark text with light halo for light basemap
-      if (loc.significance !== "minor" || view.zoom > 7) {
-        const labelText = showHistoricalNames
-          ? (locationText(loc.id, "name") || loc.name)
-          : (locationText(loc.id, "modernName") || loc.modernName);
-        labelLayer.add(new Graphic({
-          geometry: point,
-          symbol: new TextSymbol({
-            text: labelText.length > 30 ? labelText.substring(0, 27) + "..." : labelText,
-            color: [40, 25, 35, 255],
-            haloColor: [255, 255, 255, 220],
-            haloSize: 2,
-            font: {
-              size: loc.significance === "major" ? 11 : 9,
-              family: "Avenir Next LT Pro",
-              weight: loc.significance === "major" ? "bold" : "normal",
-            },
-            yoffset: size / 2 + 8,
-          }),
-          attributes: { locId: loc.id, type: "label" },
-        }));
-      }
+    // Second pass: build label candidates, sorted by priority
+    const labelCandidates = [];
+
+    locations.forEach((loc) => {
+      if (activeEra !== "all" && !loc.eras.includes(activeEra)) return;
+
+      const minZoom = getLabelMinZoom(loc);
+      if (zoom < minZoom) return;
+
+      const size = getLocationSize(loc.significance);
+      const labelText = showHistoricalNames
+        ? (locationText(loc.id, "name") || loc.name)
+        : (locationText(loc.id, "modernName") || loc.modernName);
+      const displayText = labelText.length > 28 ? labelText.substring(0, 25) + "..." : labelText;
+      const fontSize = loc.significance === "major" ? 11 : 9;
+
+      // Priority for sorting: lower = more important
+      const priority = LABEL_PRIORITY[loc.id] || (
+        loc.significance === "major" ? 3 :
+        loc.significance === "moderate" ? 4 : 5
+      );
+
+      labelCandidates.push({
+        loc,
+        text: displayText,
+        fontSize,
+        fontWeight: loc.significance === "major" ? "bold" : "normal",
+        yoffset: size / 2 + 8,
+        lat: loc.lat,
+        lng: loc.lng,
+        priority,
+      });
+    });
+
+    // Sort by priority (most important first)
+    labelCandidates.sort((a, b) => a.priority - b.priority);
+
+    // Run collision detection to remove overlapping labels
+    const visibleLabels = deconflictLabels(labelCandidates);
+
+    // Draw surviving labels
+    visibleLabels.forEach((c) => {
+      const point = new Point({ longitude: c.lng, latitude: c.lat });
+      labelLayer.add(new Graphic({
+        geometry: point,
+        symbol: new TextSymbol({
+          text: c.text,
+          color: [40, 25, 35, 255],
+          haloColor: [255, 255, 255, 220],
+          haloSize: 2,
+          font: {
+            size: c.fontSize,
+            family: "Avenir Next LT Pro",
+            weight: c.fontWeight,
+          },
+          yoffset: c.yoffset,
+        }),
+        attributes: { locId: c.loc.id, type: "label" },
+      }));
     });
   }
 
