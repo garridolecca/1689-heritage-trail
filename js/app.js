@@ -4,57 +4,128 @@
  *
  * CONFIGURATION: To use Esri's premium basemaps (e.g. Human Geography),
  * get a free API key at https://developers.arcgis.com/ and paste it below.
- * Without a key, the app uses CartoDB Positron tiles (light gray, no key required).
+ * Without a key, the app uses Esri World Light Gray Canvas tiles (public, no key required).
  */
 const ARCGIS_API_KEY = "";
 
-import { eras, locations, routes, figures, timeline, eraIndex } from "./data.js";
-import { lang, setLang, t, eraText, locationText, eventText } from "./i18n.js";
+import { eras, locations, routes, figures, timeline, eraIndex, locationIndex, YEAR_MIN, YEAR_MAX, eraForYear } from "./data.js";
+import {
+  lang, setLang, t, eraText, locationText, eventText, figureText, storedLang,
+  allLocationText, allEventText, allFigureText,
+} from "./i18n.js";
 
 // ============================================================
-// DOM references
+// Small helpers
 // ============================================================
-const langSelector = document.getElementById("langSelector");
-const splash = document.getElementById("splash");
+const $ = (id) => document.getElementById(id);
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const fold = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+const langSelector = $("langSelector");
+const splash = $("splash");
 const loaderBar = document.querySelector(".splash-loader-bar");
 
+function focusEl(el) {
+  if (!el) return;
+  if (typeof el.setFocus === "function") el.setFocus();
+  else el.focus();
+}
+
+// Localized text accessors (English comes from data.js, Spanish from content-es.js)
+const locName = (loc) => locationText(loc.id, "name") || loc.name;
+const locModern = (loc) => locationText(loc.id, "modernName") || loc.modernName;
+const locRegion = (loc) => locationText(loc.id, "region") || loc.region;
+const evtTitle = (loc, evt) => eventText(loc.id, evt.year, "title") || evt.title;
+const evtDesc = (loc, evt) => eventText(loc.id, evt.year, "description") || evt.description;
+const evtSource = (loc, evt) => eventText(loc.id, evt.year, "source") || evt.source || "";
+const figField = (fig, field) => figureText(fig.id, field) || fig[field];
+
 // ============================================================
-// Custom Modal Helpers
+// Toast
 // ============================================================
-function openModal(id) { document.getElementById(id).classList.remove("hidden"); }
-function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("visible");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("visible"), 2200);
+}
+
+// ============================================================
+// Modals (focus is moved in, trapped, and restored on close)
+// ============================================================
+const openOverlays = [];
+const returnFocus = new Map();
+
+function openModal(id) {
+  const el = $(id);
+  returnFocus.set(id, document.activeElement);
+  el.classList.remove("hidden");
+  if (!openOverlays.includes(id)) openOverlays.push(id);
+  const first = el.querySelector(".modal-close");
+  setTimeout(() => focusEl(first), 30);
+}
+
+function closeModal(id) {
+  const el = $(id);
+  el.classList.add("hidden");
+  const i = openOverlays.indexOf(id);
+  if (i >= 0) openOverlays.splice(i, 1);
+  const back = returnFocus.get(id);
+  returnFocus.delete(id);
+  if (back && document.contains(back)) focusEl(back);
+}
 
 document.querySelectorAll(".modal-overlay").forEach((overlay) => {
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.add("hidden"); });
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(overlay.id); });
 });
+$("closeInfo").addEventListener("click", () => closeModal("infoOverlay"));
+$("closeDonate").addEventListener("click", () => closeModal("donateOverlay"));
 
-document.getElementById("closeInfo").addEventListener("click", () => closeModal("infoOverlay"));
-document.getElementById("closeDonate").addEventListener("click", () => closeModal("donateOverlay"));
+// Keep Tab inside the open modal
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Tab" || !openOverlays.length) return;
+  const box = $(openOverlays[openOverlays.length - 1]).querySelector(".modal-box");
+  const items = [...box.querySelectorAll("a[href], button:not([disabled])")].filter((n) => n.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 // ============================================================
 // Donate & Info
 // ============================================================
 function fillDonateModal() {
-  document.getElementById("donateModalTitle").textContent = t("donateTitle");
-  document.getElementById("donateText").textContent = t("donateText");
-  document.getElementById("donateBtnLabel").textContent = t("donateButton") + " via Venmo";
-  document.getElementById("donatePaypalLabel").textContent = t("donateButton") + " via PayPal";
-  document.getElementById("donateQrLabel").textContent =
-    lang === "es" ? "O escanea este código QR (Venmo):" : "Or scan this QR code (Venmo):";
-  document.getElementById("donateEmailLabel").textContent = t("donateEmailLabel");
+  $("donateModalTitle").textContent = t("donateTitle");
+  $("donateText").textContent = t("donateText");
+  $("donateBtnLabel").textContent = t("donateButton") + " via Venmo";
+  $("donatePaypalLabel").textContent = t("donateButton") + " via PayPal";
+  $("donateQrLabel").textContent = t("donateQr");
+  $("donateEmailLabel").textContent = t("donateEmailLabel");
 }
 
 function fillInfoModal() {
-  document.getElementById("infoModalTitle").textContent = t("infoTitle");
-  const content = document.getElementById("infoModalContent");
+  $("infoModalTitle").textContent = t("infoTitle");
   const legendItems = eras.map((e) =>
     `<div class="legend-item"><span class="legend-line" style="background:${e.hexColor}"></span>${eraText(e.id, "name")} (${eraText(e.id, "dateRange")})</div>`
   ).join("");
-  content.innerHTML = `
+  $("infoModalContent").innerHTML = `
     <p>${eraText(1, "description")}</p>
     <div class="info-legend">
       <h4>${t("infoLegendTitle")}</h4>
       ${legendItems}
+    </div>
+    <div class="info-features">
+      <h4>${t("infoHowTitle")}</h4>
+      <ul>
+        <li>${t("infoHow1")}</li>
+        <li>${t("infoHow2")}</li>
+        <li>${t("infoHow3")}</li>
+        <li>${t("infoHow4")}</li>
+        <li>${t("infoHow5")}</li>
+      </ul>
     </div>
     <div class="info-features">
       <h4>${t("infoFeaturesTitle")}</h4>
@@ -66,28 +137,29 @@ function fillInfoModal() {
         <li>${t("infoFeature5")}</li>
       </ul>
     </div>
+    <p class="info-note">${t("infoSourcesNote")}</p>
     <div class="info-verse">${t("infoVerse")}</div>
   `;
 }
 
-document.getElementById("btnDonate").addEventListener("click", () => { fillDonateModal(); openModal("donateOverlay"); });
-document.getElementById("btnInfo").addEventListener("click", () => { fillInfoModal(); openModal("infoOverlay"); });
+$("btnDonate").addEventListener("click", () => { fillDonateModal(); openModal("donateOverlay"); });
+$("btnInfo").addEventListener("click", () => { fillInfoModal(); openModal("infoOverlay"); });
 
 // ============================================================
-// Language Selector Flow
+// Language flow: skip the chooser when a language is already known (?lang= or last visit)
 // ============================================================
+function beginApp() {
+  langSelector.classList.add("hidden");
+  splash.classList.remove("hidden");
+  $("splashTitle").textContent = t("appTitle");
+  $("splashSubtitle").textContent = t("appSubtitle");
+  $("splashVerse").textContent = t("splashVerse");
+  $("splashRef").textContent = "— " + t("splashVerseRef");
+  initMap();
+}
+
 document.querySelectorAll(".lang-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const chosenLang = btn.dataset.lang;
-    setLang(chosenLang);
-    langSelector.classList.add("hidden");
-    splash.classList.remove("hidden");
-    document.getElementById("splashTitle").textContent = t("appTitle");
-    document.getElementById("splashSubtitle").textContent = t("appSubtitle");
-    document.getElementById("splashVerse").textContent = t("splashVerse");
-    document.getElementById("splashRef").textContent = "— " + t("splashVerseRef");
-    initMap();
-  });
+  btn.addEventListener("click", () => { setLang(btn.dataset.lang); beginApp(); });
 });
 
 // ============================================================
@@ -107,15 +179,71 @@ function startProgress() {
 function dismissSplash() {
   clearInterval(progressInterval);
   loaderBar.style.width = "100%";
-  setTimeout(() => splash.classList.add("hidden"), 500);
+  setTimeout(() => splash.classList.add("hidden"), reducedMotion.matches ? 0 : 500);
 }
 
 function showError(msg) {
   clearInterval(progressInterval);
   const el = document.createElement("p");
-  el.style.cssText = "color:#A34B4B;font-size:13px;margin-top:1rem;";
+  el.style.cssText = "color:#E08A8A;font-size:13px;margin-top:1rem;";
   el.textContent = msg;
   document.querySelector(".splash-content").appendChild(el);
+}
+
+// ============================================================
+// Static text (labels, aria attributes) for the current language
+// ============================================================
+function applyTranslations() {
+  document.documentElement.lang = lang;
+  document.title = `${t("appTitle")} — ${t("appSubtitle")}`;
+  const navLogo = $("navLogo");
+  navLogo.setAttribute("heading", t("appTitle"));
+  navLogo.setAttribute("description", t("appSubtitle"));
+
+  $("timelineBtnText").textContent = t("btnTimeline");
+  $("figuresBtnText").textContent = t("btnFigures");
+  $("namesBtnText").textContent = t("btnNames");
+  $("shareBtnText").textContent = t("share");
+  $("donateBtnText").textContent = t("btnSupport");
+  $("langBtnText").textContent = lang === "en" ? "ES" : "EN";
+  $("locationsBtnText").textContent = t("btnLocations");
+
+  // calcite buttons take an accessible name from `label`
+  $("btnTimeline").setAttribute("label", t("timelineTitle"));
+  $("btnFigures").setAttribute("label", t("figuresTitle"));
+  $("btnToggleNames").setAttribute("label", t("btnNames"));
+  $("btnShare").setAttribute("label", t("shareLabel"));
+  $("btnShare").setAttribute("title", t("shareLabel"));
+  $("btnDonate").setAttribute("label", t("donateTitle"));
+  $("btnDonate").setAttribute("title", t("donateTitle"));
+  $("btnLang").setAttribute("label", t("langLabel"));
+  $("btnLang").setAttribute("title", t("langLabel"));
+  $("btnInfo").setAttribute("label", t("infoLabel"));
+  $("btnInfo").setAttribute("title", t("infoLabel"));
+  ["closeTimeline", "closeFigures", "closeLocations", "closeSheet"].forEach((id) => $(id).setAttribute("label", t("closeLabel")));
+  ["closeInfo", "closeDonate"].forEach((id) => $(id).setAttribute("aria-label", t("closeLabel")));
+
+  document.querySelectorAll(".journey-chip").forEach((chip) => {
+    const labelEl = chip.querySelector(".chip-label");
+    const key = labelEl?.dataset?.i18n;
+    if (key) labelEl.textContent = t(key);
+  });
+  document.querySelector(".journey-chips").setAttribute("aria-label", t("infoLegendTitle"));
+
+  $("searchInput").setAttribute("placeholder", t("searchPlaceholder"));
+  $("searchInput").setAttribute("aria-label", t("searchLabel"));
+  $("searchResults").setAttribute("aria-label", t("searchResultsLabel"));
+
+  $("timelinePanelTitle").textContent = t("timelineTitle");
+  $("figuresPanelTitle").textContent = t("figuresTitle");
+  $("locationsPanelTitle").textContent = t("locationsTitle");
+  $("prevLabel").textContent = t("previous");
+  $("nextLabel").textContent = t("next");
+  $("viewDiv").setAttribute("aria-label", t("mapLabel"));
+  $("yearSlider").setAttribute("aria-label", t("yearSliderLabel"));
+  $("btnYearReset").setAttribute("aria-label", t("yearReset"));
+  $("btnYearReset").setAttribute("title", t("yearReset"));
+  $("nameLabel").textContent = t("showingHistorical");
 }
 
 // ============================================================
@@ -166,7 +294,7 @@ async function initMap() {
     throw err;
   }
 
-  // Basemap: CartoDB Positron (light, labeled, no API key needed)
+  // Basemap
   let mapBasemap;
   if (ARCGIS_API_KEY) {
     esriConfig.apiKey = ARCGIS_API_KEY;
@@ -185,12 +313,52 @@ async function initMap() {
     mapBasemap = new Basemap({ baseLayers: [grayBase], referenceLayers: [grayLabels] });
   }
 
-  // State
-  let activeEra = "all";
+  // ----------------------------------------------------------
+  // State (restored from the URL on load, written back as you navigate)
+  // ----------------------------------------------------------
+  const state = { era: "all", year: YEAR_MAX };
   let showHistoricalNames = true;
   let selectedLocation = null;
   let orderedStops = [];
   let currentStopIndex = -1;
+  let sheetOpener = null;
+
+  const goOpts = (ms) => ({ duration: reducedMotion.matches ? 0 : ms });
+  const yearOn = () => state.year < YEAR_MAX;
+
+  // Events of a location that pass the era filter and have happened by the current year
+  function locEvents(loc) {
+    return loc.events.filter((e) => (state.era === "all" || e.era === state.era) && (!yearOn() || e.year <= state.year));
+  }
+  const locVisible = (loc) => locEvents(loc).length > 0;
+
+  function readUrl() {
+    const p = new URLSearchParams(location.search);
+    const era = p.get("era");
+    const year = parseInt(p.get("year"), 10);
+    const loc = p.get("loc");
+    return {
+      era: era && ["1", "2", "3", "4"].includes(era) ? parseInt(era, 10) : "all",
+      year: Number.isFinite(year) ? Math.min(YEAR_MAX, Math.max(YEAR_MIN, year)) : YEAR_MAX,
+      loc: loc && locationIndex[loc] ? loc : null,
+    };
+  }
+
+  let urlTimer = 0;
+  function writeUrl() {
+    const p = new URLSearchParams();
+    p.set("lang", lang);
+    if (state.era !== "all") p.set("era", String(state.era));
+    if (yearOn()) p.set("year", String(state.year));
+    if (selectedLocation && bottomSheet.classList.contains("open")) p.set("loc", selectedLocation.id);
+    const url = `${location.pathname}?${p.toString()}`;
+    try { history.replaceState(null, "", url); } catch (e) { /* ignore */ }
+  }
+  // the year changes many times a second during playback, so writes are spaced out
+  function syncUrl() {
+    clearTimeout(urlTimer);
+    urlTimer = setTimeout(writeUrl, 350);
+  }
 
   // Layers
   const geoLayer = new GraphicsLayer({ title: "GeoLabels" });
@@ -250,15 +418,9 @@ async function initMap() {
   });
 
   view.ui.move("zoom", "bottom-right");
-  view.when(dismissSplash).catch((err) => {
-    console.error("MapView failed:", err);
-    showError(lang === "es" ? "El mapa no pudo cargarse." : "Map failed to load.");
-    dismissSplash();
-  });
 
-  // Drawing Helpers
-  function getEraColor(eraId) { return eraIndex[eraId]?.color || [150, 150, 150]; }
-  function getEraHex(eraId) { return eraIndex[eraId]?.hexColor || "#999"; }
+  // Drawing helpers
+  const getEraColor = (eraId) => eraIndex[eraId]?.color || [150, 150, 150];
 
   function getLocationSize(significance) {
     switch (significance) {
@@ -269,39 +431,42 @@ async function initMap() {
   }
 
   function getStopNumber(loc) {
-    if (activeEra === "all") {
-      const event = loc.events[0];
-      return event ? event.order : null;
-    }
-    const event = loc.events.find((e) => e.era === activeEra);
-    return event ? event.order : null;
+    const ev = locEvents(loc)[0];
+    return ev ? ev.order : null;
   }
 
   function getStopEraColor(loc) {
-    if (activeEra === "all") return getEraColor(loc.eras[0]);
-    return getEraColor(activeEra);
+    if (state.era !== "all") return getEraColor(state.era);
+    const ev = locEvents(loc)[0];
+    return getEraColor(ev ? ev.era : loc.eras[0]);
   }
 
-  // Draw Routes
+  // Routes: whole era paths normally; with the year slider in use, only the legs whose two ends have appeared
+  const coordIndex = {};
+  locations.forEach((l) => { coordIndex[`${l.lng},${l.lat}`] = l; });
+
   function drawRoutes() {
     routeLayer.removeAll();
     routes.forEach((route) => {
       const era = eraIndex[route.era];
       if (!era) return;
-      if (activeEra !== "all" && activeEra !== route.era) return;
-
-      if (route.path && route.path.length > 1) {
-        routeLayer.add(new Graphic({
-          geometry: new Polyline({ paths: [route.path] }),
-          symbol: new SimpleLineSymbol({
-            color: [...era.color, 180],
-            width: 2.5,
-            style: "dash",
-            cap: "round",
-            join: "round",
-          }),
-          attributes: { era: route.era },
-        }));
+      if (state.era !== "all" && state.era !== route.era) return;
+      const symbol = new SimpleLineSymbol({ color: [...era.color, 180], width: 2.5, style: "dash", cap: "round", join: "round" });
+      if (!yearOn()) {
+        if (route.path && route.path.length > 1) {
+          routeLayer.add(new Graphic({ geometry: new Polyline({ paths: [route.path] }), symbol, attributes: { era: route.era } }));
+        }
+        return;
+      }
+      for (let i = 0; i < route.path.length - 1; i++) {
+        const a = coordIndex[route.path[i].join(",")];
+        const b = coordIndex[route.path[i + 1].join(",")];
+        if (a && b && locVisible(a) && locVisible(b)) {
+          routeLayer.add(new Graphic({
+            geometry: new Polyline({ paths: [[route.path[i], route.path[i + 1]]] }),
+            symbol, attributes: { era: route.era },
+          }));
+        }
       }
     });
   }
@@ -309,8 +474,6 @@ async function initMap() {
   // ============================================================
   // Zoom-Based Labeling with Collision Detection
   // ============================================================
-
-  // London bounding box — locations in this cluster need higher zoom to show labels
   const LONDON_BOX = { latMin: 51.48, latMax: 51.53, lngMin: -0.13, lngMax: -0.04 };
 
   function isInLondon(loc) {
@@ -319,108 +482,70 @@ async function initMap() {
   }
 
   // Priority for label display (lower = more important, shown first)
-  // These specific IDs are the "hero" locations that represent each cluster
   const LABEL_PRIORITY = {
-    "metropolitan-tabernacle": 1,  // iconic, slightly offset south of London cluster
-    "broadmead-bristol": 1,        // isolated in the west
-    "bunyan-bedford": 1,           // isolated north
-    "kettering": 1,                // isolated NE
-    "hill-cliffe": 1,              // isolated NW
-    "kelvedon": 2,                 // isolated east
-    "colchester": 2,               // isolated east
-    "llanwenarth": 2,              // isolated Wales
-    "olchon-valley": 2,            // isolated Wales border
-    "knocklas": 2,                 // isolated Wales
-    "cawkwell": 2,                 // isolated Lincolnshire
-    "leicester": 2,                // isolated midlands
-    "waterbeach": 2,               // isolated east
-    "abergavenny": 2,              // isolated Wales
+    "metropolitan-tabernacle": 1,
+    "broadmead-bristol": 1,
+    "bunyan-bedford": 1,
+    "kettering": 1,
+    "hill-cliffe": 1,
+    "kelvedon": 2,
+    "colchester": 2,
+    "llanwenarth": 2,
+    "olchon-valley": 2,
+    "knocklas": 2,
+    "cawkwell": 2,
+    "leicester": 2,
+    "waterbeach": 2,
+    "abergavenny": 2,
   };
 
-  /**
-   * Determine the minimum zoom level at which a location's label should appear.
-   * This prevents clutter at wide zoom and progressively reveals labels as you zoom in.
-   */
   function getLabelMinZoom(loc) {
     const priority = LABEL_PRIORITY[loc.id];
-    // Priority 1 = hero labels, always visible from zoom 6
     if (priority === 1) return 6;
-    // Priority 2 = isolated non-London locations, show from zoom 7
     if (priority === 2) return 7;
-
-    const inLondon = isInLondon(loc);
-
-    if (inLondon) {
-      // London cluster: stagger labels by significance
+    if (isInLondon(loc)) {
       if (loc.significance === "major") return 9;
       if (loc.significance === "moderate") return 10;
       return 11;
     }
-
-    // Non-London, no special priority
     if (loc.significance === "major") return 7;
     if (loc.significance === "moderate") return 8;
     return 10;
   }
 
-  /**
-   * Screen-space collision detection.
-   * Given a list of candidate labels (sorted by priority), returns only those
-   * whose bounding boxes don't overlap with already-placed labels.
-   */
   function deconflictLabels(candidates) {
-    const placed = []; // array of { x, y, w, h } screen-space boxes
-
+    const placed = [];
     return candidates.filter((c) => {
       const screenPt = view.toScreen(new Point({ longitude: c.lng, latitude: c.lat }));
       if (!screenPt) return false;
-
-      // Estimate label bounding box in pixels
       const charWidth = c.fontSize * 0.55;
-      const w = c.text.length * charWidth + 12; // +padding
+      const w = c.text.length * charWidth + 12;
       const h = c.fontSize + 6;
-      const x = screenPt.x - w / 2;
-      const y = screenPt.y - c.yoffset - h;
-
-      const box = { x, y, w, h };
-
-      // Check overlap against all placed labels
+      const box = { x: screenPt.x - w / 2, y: screenPt.y - c.yoffset - h, w, h };
       const overlaps = placed.some((p) =>
-        box.x < p.x + p.w && box.x + box.w > p.x &&
-        box.y < p.y + p.h && box.y + box.h > p.y
-      );
-
-      if (!overlaps) {
-        placed.push(box);
-        return true;
-      }
+        box.x < p.x + p.w && box.x + box.w > p.x && box.y < p.y + p.h && box.y + box.h > p.y);
+      if (!overlaps) { placed.push(box); return true; }
       return false;
     });
   }
 
-  // Draw Locations
   function drawLocations() {
     cityLayer.removeAll();
     labelLayer.removeAll();
-
     const zoom = view.zoom;
 
-    // First pass: draw all markers (always visible)
     locations.forEach((loc) => {
-      if (activeEra !== "all" && !loc.eras.includes(activeEra)) return;
-
+      if (!locVisible(loc)) return;
       const markerColor = getStopEraColor(loc);
       const size = getLocationSize(loc.significance);
       const stopNumber = getStopNumber(loc);
       const point = new Point({ longitude: loc.lng, latitude: loc.lat });
 
-      // Glow for major locations
       if (loc.significance === "major") {
         cityLayer.add(new Graphic({
           geometry: point,
           symbol: new SimpleMarkerSymbol({
-            style: "circle",
-            size: size + 12,
+            style: "circle", size: size + 12,
             color: [markerColor[0], markerColor[1], markerColor[2], 40],
             outline: { color: [0, 0, 0, 0], width: 0 },
           }),
@@ -428,19 +553,16 @@ async function initMap() {
         }));
       }
 
-      // Location marker
       cityLayer.add(new Graphic({
         geometry: point,
         symbol: new SimpleMarkerSymbol({
-          style: "circle",
-          size,
+          style: "circle", size,
           color: [...markerColor, 255],
           outline: { color: [60, 40, 50, 200], width: loc.significance === "major" ? 2.5 : 2 },
         }),
         attributes: { locId: loc.id, type: "city" },
       }));
 
-      // Stop number inside marker
       if (stopNumber != null) {
         const numFontSize = loc.significance === "major" ? 9 : loc.significance === "moderate" ? 8 : 7;
         cityLayer.add(new Graphic({
@@ -460,296 +582,275 @@ async function initMap() {
       }
     });
 
-    // Second pass: build label candidates, sorted by priority
     const labelCandidates = [];
-
     locations.forEach((loc) => {
-      if (activeEra !== "all" && !loc.eras.includes(activeEra)) return;
-
-      const minZoom = getLabelMinZoom(loc);
-      if (zoom < minZoom) return;
-
+      if (!locVisible(loc)) return;
+      if (zoom < getLabelMinZoom(loc)) return;
       const size = getLocationSize(loc.significance);
-      const labelText = showHistoricalNames
-        ? (locationText(loc.id, "name") || loc.name)
-        : (locationText(loc.id, "modernName") || loc.modernName);
+      const labelText = showHistoricalNames ? locName(loc) : locModern(loc);
       const displayText = labelText.length > 28 ? labelText.substring(0, 25) + "..." : labelText;
       const fontSize = loc.significance === "major" ? 11 : 9;
-
-      // Priority for sorting: lower = more important
-      const priority = LABEL_PRIORITY[loc.id] || (
-        loc.significance === "major" ? 3 :
-        loc.significance === "moderate" ? 4 : 5
-      );
-
+      const priority = LABEL_PRIORITY[loc.id] || (loc.significance === "major" ? 3 : loc.significance === "moderate" ? 4 : 5);
       labelCandidates.push({
-        loc,
-        text: displayText,
-        fontSize,
+        loc, text: displayText, fontSize,
         fontWeight: loc.significance === "major" ? "bold" : "normal",
-        yoffset: size / 2 + 8,
-        lat: loc.lat,
-        lng: loc.lng,
-        priority,
+        yoffset: size / 2 + 8, lat: loc.lat, lng: loc.lng, priority,
       });
     });
-
-    // Sort by priority (most important first)
     labelCandidates.sort((a, b) => a.priority - b.priority);
 
-    // Run collision detection to remove overlapping labels
-    const visibleLabels = deconflictLabels(labelCandidates);
-
-    // Draw surviving labels
-    visibleLabels.forEach((c) => {
-      const point = new Point({ longitude: c.lng, latitude: c.lat });
+    deconflictLabels(labelCandidates).forEach((c) => {
       labelLayer.add(new Graphic({
-        geometry: point,
+        geometry: new Point({ longitude: c.lng, latitude: c.lat }),
         symbol: new TextSymbol({
           text: c.text,
           color: [40, 25, 35, 255],
           haloColor: [255, 255, 255, 220],
           haloSize: 2,
-          font: {
-            size: c.fontSize,
-            family: "Avenir Next LT Pro",
-            weight: c.fontWeight,
-          },
+          font: { size: c.fontSize, family: "Avenir Next LT Pro", weight: c.fontWeight },
           yoffset: c.yoffset,
         }),
         attributes: { locId: c.loc.id, type: "label" },
       }));
     });
+
+    // ring around the open location
+    if (selectedLocation && locVisible(selectedLocation) && bottomSheet.classList.contains("open")) {
+      cityLayer.add(new Graphic({
+        geometry: new Point({ longitude: selectedLocation.lng, latitude: selectedLocation.lat }),
+        symbol: new SimpleMarkerSymbol({
+          style: "circle",
+          size: getLocationSize(selectedLocation.significance) + 12,
+          color: [201, 168, 76, 35],
+          outline: { color: [201, 168, 76, 200], width: 2 },
+        }),
+        attributes: { locId: selectedLocation.id, type: "highlight" },
+      }));
+    }
   }
 
   function refresh() {
     drawGeoLabels();
     drawRoutes();
     drawLocations();
+    buildLocationsPanel();
   }
 
-  // Era Chip Selector
-  const chips = document.querySelectorAll(".journey-chip");
-  chips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      chips.forEach((c) => c.classList.remove("active"));
-      chip.classList.add("active");
-      const val = chip.dataset.era;
-      activeEra = val === "all" ? "all" : parseInt(val);
-      closeBottomSheet();
-      refresh();
+  // ============================================================
+  // Panels
+  // ============================================================
+  const PANEL_BUTTONS = { timelinePanel: "btnTimeline", figuresPanel: "btnFigures", locationsPanel: "btnLocations" };
+  const panelReturn = {};
 
-      if (activeEra !== "all") {
-        const eraLocations = locations.filter((l) => l.eras.includes(activeEra));
-        if (eraLocations.length > 0) zoomToLocations(eraLocations);
-      } else {
-        view.goTo({ center: [-1.5, 52.0], zoom: 6 }, { duration: 800 });
+  function togglePanel(panelId, show, opts = {}) {
+    const panel = $(panelId);
+    if (show === undefined) show = panel.classList.contains("hidden");
+    if (show) {
+      Object.keys(PANEL_BUTTONS).forEach((id) => { if (id !== panelId) togglePanel(id, false, { quiet: true }); });
+      panelReturn[panelId] = document.activeElement;
+      panel.classList.remove("hidden");
+      $(PANEL_BUTTONS[panelId])?.setAttribute("aria-expanded", "true");
+      if (!opts.quiet) {
+        setTimeout(() => focusEl(panel.querySelector("[data-focus], .list-item, .timeline-item, .figure-card") || panel.querySelector("calcite-button")), 40);
       }
-    });
-  });
-
-  function zoomToLocations(locs) {
-    const lngs = locs.map((l) => l.lng);
-    const lats = locs.map((l) => l.lat);
-    view.goTo({
-      xmin: Math.min(...lngs) - 1,
-      ymin: Math.min(...lats) - 1,
-      xmax: Math.max(...lngs) + 1,
-      ymax: Math.max(...lats) + 1,
-      spatialReference: { wkid: 4326 },
-    }, { duration: 800 });
+    } else {
+      if (panel.classList.contains("hidden")) return;
+      panel.classList.add("hidden");
+      $(PANEL_BUTTONS[panelId])?.setAttribute("aria-expanded", "false");
+      if (!opts.quiet && !opts.noReturn) {
+        const back = panelReturn[panelId];
+        if (back && document.contains(back)) focusEl(back);
+      }
+    }
   }
 
-  // Timeline Panel
+  function anyPanelOpen() {
+    return Object.keys(PANEL_BUTTONS).find((id) => !$(id).classList.contains("hidden")) || null;
+  }
+
+  $("btnTimeline").addEventListener("click", () => togglePanel("timelinePanel"));
+  $("btnFigures").addEventListener("click", () => togglePanel("figuresPanel"));
+  $("btnLocations").addEventListener("click", () => togglePanel("locationsPanel"));
+  $("closeTimeline").addEventListener("click", () => togglePanel("timelinePanel", false));
+  $("closeFigures").addEventListener("click", () => togglePanel("figuresPanel", false));
+  $("closeLocations").addEventListener("click", () => togglePanel("locationsPanel", false));
+
+  function makeKeyboardClickable(el, handler) {
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    el.addEventListener("click", handler);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handler(e); }
+    });
+  }
+
+  // Timeline panel
   function buildTimelinePanel() {
-    const content = document.getElementById("timelineContent");
-    content.innerHTML = timeline.map((evt) => {
+    const content = $("timelineContent");
+    content.innerHTML = timeline.map((evt, i) => {
       const era = eraIndex[evt.era];
+      const loc = locationIndex[evt.locationId];
       return `
-        <div class="timeline-item" data-location="${evt.locationId}">
+        <div class="timeline-item" data-i="${i}" data-location="${evt.locationId}">
           <div class="timeline-dot" style="background:${era.hexColor}"></div>
           <div class="timeline-year" style="color:${era.hexColor}">${evt.year}</div>
-          <div class="timeline-title">${evt.title}</div>
-          <div class="timeline-location">${evt.locationName}</div>
+          <div class="timeline-title">${evtTitle(loc, evt)}</div>
+          <div class="timeline-location">${locName(loc)}</div>
         </div>
       `;
     }).join("");
-
     content.querySelectorAll(".timeline-item").forEach((item) => {
-      item.addEventListener("click", () => {
-        const locId = item.dataset.location;
-        selectLocation(locId);
-        togglePanel("timelinePanel", false);
-        const loc = locations.find((l) => l.id === locId);
-        if (loc) view.goTo({ center: [loc.lng, loc.lat], zoom: 10 }, { duration: 600 });
+      makeKeyboardClickable(item, () => {
+        const loc = locationIndex[item.dataset.location];
+        togglePanel("timelinePanel", false, { noReturn: true });
+        selectLocation(loc.id, { zoom: true });
       });
     });
   }
 
-  // Figures Panel
+  // Figures panel
   function buildFiguresPanel() {
-    const content = document.getElementById("figuresContent");
+    const content = $("figuresContent");
     content.innerHTML = figures.map((fig) => `
       <div class="figure-card" data-figure="${fig.id}">
         <div class="figure-name">${fig.name}</div>
-        <div class="figure-years">${fig.years}</div>
-        <div class="figure-role">${fig.role}</div>
-        <div class="figure-bio">${fig.bio}</div>
+        <div class="figure-years">${figField(fig, "years")}</div>
+        <div class="figure-role">${figField(fig, "role")}</div>
+        <div class="figure-bio">${figField(fig, "bio")}</div>
       </div>
     `).join("");
-
     content.querySelectorAll(".figure-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        const figName = card.querySelector(".figure-name").textContent;
-        const loc = locations.find((l) => l.events.some((e) => e.figure === figName));
+      makeKeyboardClickable(card, () => {
+        const loc = locationOfFigure(card.dataset.figure);
         if (loc) {
-          selectLocation(loc.id);
-          togglePanel("figuresPanel", false);
-          view.goTo({ center: [loc.lng, loc.lat], zoom: 10 }, { duration: 600 });
+          togglePanel("figuresPanel", false, { noReturn: true });
+          selectLocation(loc.id, { zoom: true });
         }
       });
     });
   }
 
-  function togglePanel(panelId, show) {
-    const panel = document.getElementById(panelId);
-    if (show === undefined) show = panel.classList.contains("hidden");
-    if (show) {
-      document.querySelectorAll(".scripture-panel").forEach((p) => p.classList.add("hidden"));
-      panel.classList.remove("hidden");
-    } else {
-      panel.classList.add("hidden");
-    }
+  function locationOfFigure(figId) {
+    const fig = figures.find((f) => f.id === figId);
+    if (!fig) return null;
+    const hits = [];
+    locations.forEach((l) => l.events.forEach((e) => { if (e.figure === fig.name) hits.push({ l, year: e.year }); }));
+    hits.sort((a, b) => a.year - b.year);
+    return hits[0]?.l || null;
   }
 
-  document.getElementById("btnTimeline").addEventListener("click", () => togglePanel("timelinePanel"));
-  document.getElementById("btnFigures").addEventListener("click", () => togglePanel("figuresPanel"));
-  document.getElementById("closeTimeline").addEventListener("click", () => togglePanel("timelinePanel", false));
-  document.getElementById("closeFigures").addEventListener("click", () => togglePanel("figuresPanel", false));
+  // Locations panel: every place currently shown, as a keyboard-operable list
+  function buildLocationsPanel() {
+    const content = $("locationsContent");
+    const list = locations.filter(locVisible).sort((a, b) => locName(a).localeCompare(locName(b), lang));
+    content.innerHTML = list.map((loc) => {
+      const first = locEvents(loc)[0];
+      const era = eraIndex[first.era];
+      return `
+        <div class="list-item" data-loc="${loc.id}">
+          <span class="list-dot" style="background:${era.hexColor}"></span>
+          <span class="list-text"><span class="list-name">${locName(loc)}</span><span class="list-sub">${locModern(loc)} · ${first.year}</span></span>
+        </div>`;
+    }).join("");
+    content.querySelectorAll(".list-item").forEach((item) => {
+      makeKeyboardClickable(item, () => {
+        togglePanel("locationsPanel", false, { noReturn: true });
+        selectLocation(item.dataset.loc, { zoom: true });
+      });
+    });
+  }
 
-  // Name Toggle
-  const nameToggle = document.getElementById("nameToggle");
-  const nameLabel = document.getElementById("nameLabel");
-  let nameToggleTimeout;
-
-  document.getElementById("btnToggleNames").addEventListener("click", () => {
-    showHistoricalNames = !showHistoricalNames;
-    nameLabel.textContent = showHistoricalNames ? t("showingHistorical") : t("showingModern");
-    nameToggle.classList.add("visible");
-    clearTimeout(nameToggleTimeout);
-    nameToggleTimeout = setTimeout(() => nameToggle.classList.remove("visible"), 2000);
-    drawLocations();
-  });
-
-  // Language Switch (in-app toggle)
-  document.getElementById("btnLang").addEventListener("click", () => {
-    const newLang = lang === "en" ? "es" : "en";
-    setLang(newLang);
-    applyTranslations();
-    buildTimelinePanel();
-    buildFiguresPanel();
-    refresh();
-    if (selectedLocation && bottomSheet.classList.contains("open")) {
-      openBottomSheet(selectedLocation);
-    }
-  });
-
-  // Bottom Sheet
-  const bottomSheet = document.getElementById("bottomSheet");
-  const sheetLocationName = document.getElementById("sheetLocationName");
-  const sheetModernName = document.getElementById("sheetModernName");
-  const sheetEvents = document.getElementById("sheetEvents");
-  const sheetHandle = document.getElementById("sheetHandle");
+  // ============================================================
+  // Bottom sheet (location details)
+  // ============================================================
+  const bottomSheet = $("bottomSheet");
+  const sheetLocationName = $("sheetLocationName");
+  const sheetModernName = $("sheetModernName");
+  const sheetEvents = $("sheetEvents");
+  const sheetHandle = $("sheetHandle");
 
   function buildStopList() {
     const stops = [];
-    if (activeEra !== "all") {
+    if (state.era !== "all") {
       locations.forEach((loc) => {
-        const event = loc.events.find((e) => e.era === activeEra);
-        if (event) stops.push({ loc, order: event.order, era: activeEra });
+        const ev = locEvents(loc)[0];
+        if (ev) stops.push({ loc, order: ev.order, eraId: state.era });
       });
       stops.sort((a, b) => a.order - b.order);
     } else {
       [1, 2, 3, 4].forEach((eraId) => {
         locations.forEach((loc) => {
-          const event = loc.events.find((e) => e.era === eraId);
-          if (event) stops.push({ loc, order: event.order, era: eraId });
+          const ev = locEvents(loc).find((e) => e.era === eraId);
+          if (ev) stops.push({ loc, order: ev.order, eraId });
         });
       });
-      const seen = new Set();
-      const unique = [];
-      stops.forEach((s) => { if (!seen.has(s.loc.id)) { seen.add(s.loc.id); unique.push(s); } });
-      stops.length = 0;
-      stops.push(...unique);
     }
-    orderedStops = stops.map((s) => s.loc);
+    const seen = new Set();
+    orderedStops = stops.filter((s) => (seen.has(s.loc.id) ? false : (seen.add(s.loc.id), true))).map((s) => s.loc);
   }
 
   function updateNavButtons() {
-    const prevBtn = document.getElementById("btnPrevStop");
-    const nextBtn = document.getElementById("btnNextStop");
-    const counter = document.getElementById("stopCounter");
-    document.getElementById("prevLabel").textContent = lang === "es" ? "Anterior" : "Previous";
-    document.getElementById("nextLabel").textContent = lang === "es" ? "Siguiente" : "Next";
+    const prevBtn = $("btnPrevStop");
+    const nextBtn = $("btnNextStop");
     prevBtn.disabled = currentStopIndex <= 0;
     nextBtn.disabled = currentStopIndex >= orderedStops.length - 1;
-    counter.textContent = `${currentStopIndex + 1} / ${orderedStops.length}`;
+    $("stopCounter").textContent = `${currentStopIndex + 1} / ${orderedStops.length}`;
   }
 
   function navigateToStop(index) {
     if (index < 0 || index >= orderedStops.length) return;
-    currentStopIndex = index;
     const loc = orderedStops[index];
-    openBottomSheet(loc);
-    highlightLocation(loc.id);
-    view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 9) }, { duration: 500 });
+    openBottomSheet(loc, { keepFocus: true });
+    view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 9) }, goOpts(500));
   }
 
-  document.getElementById("btnPrevStop").addEventListener("click", () => navigateToStop(currentStopIndex - 1));
-  document.getElementById("btnNextStop").addEventListener("click", () => navigateToStop(currentStopIndex + 1));
+  $("btnPrevStop").addEventListener("click", () => navigateToStop(currentStopIndex - 1));
+  $("btnNextStop").addEventListener("click", () => navigateToStop(currentStopIndex + 1));
 
-  function openBottomSheet(loc) {
+  function openBottomSheet(loc, opts = {}) {
+    if (!bottomSheet.classList.contains("open") && !opts.keepFocus) sheetOpener = document.activeElement;
     selectedLocation = loc;
     buildStopList();
     currentStopIndex = orderedStops.findIndex((l) => l.id === loc.id);
 
-    const locName = locationText(loc.id, "name") || loc.name;
-    const modName = locationText(loc.id, "modernName") || loc.modernName;
-    const region = locationText(loc.id, "region") || loc.region;
-    sheetLocationName.textContent = locName;
-    sheetModernName.textContent = `${t("sheetModernLabel")} ${modName}  |  ${t("sheetRegionLabel")} ${region}`;
+    sheetLocationName.textContent = locName(loc);
+    sheetModernName.textContent = `${t("sheetModernLabel")} ${locModern(loc)}  |  ${t("sheetRegionLabel")} ${locRegion(loc)}`;
 
-    let eventsToShow = loc.events;
-    if (activeEra !== "all") {
-      eventsToShow = loc.events.filter((e) => e.era === activeEra);
-    }
-
-    sheetEvents.innerHTML = eventsToShow.map((event) => {
-      const era = eraIndex[event.era];
-      const eraShort = eraText(event.era, "shortName") || era.shortName;
-      const eraDate = eraText(event.era, "dateRange") || era.dateRange;
-
+    const eventsToShow = locEvents(loc);
+    sheetEvents.innerHTML = eventsToShow.length ? eventsToShow.map((event) => {
+      const eraShort = eraText(event.era, "shortName");
+      const eraDate = eraText(event.era, "dateRange");
+      const src = evtSource(loc, event);
       return `
         <div class="event-card" data-era="${event.era}">
           <div class="event-era-tag">${event.year} &bull; ${eraShort} &bull; ${eraDate}</div>
-          <div class="event-action">${event.title}</div>
-          <p class="event-description">${event.description}</p>
+          <div class="event-action">${evtTitle(loc, event)}</div>
+          <p class="event-description">${evtDesc(loc, event)}</p>
           ${event.figure ? `<span class="event-figure-tag">${event.figure}</span>` : ""}
+          ${src ? `<p class="event-source"><span>${t("sourceLabel")}</span> ${src}</p>` : ""}
         </div>
       `;
-    }).join("");
+    }).join("") : `<p class="event-description">${t("noEventsYet")}</p>`;
 
     updateNavButtons();
     bottomSheet.classList.add("open");
-    document.getElementById("sheetContent").scrollTop = 0;
+    $("sheetContent").scrollTop = 0;
+    drawLocations();
+    syncUrl();
+    if (!opts.noFocus) setTimeout(() => sheetLocationName.focus({ preventScroll: true }), 60);
   }
 
-  function closeBottomSheet() {
+  function closeBottomSheet(opts = {}) {
+    if (!bottomSheet.classList.contains("open")) { selectedLocation = null; return; }
     bottomSheet.classList.remove("open");
     selectedLocation = null;
+    drawLocations();
+    syncUrl();
+    if (!opts.silent && sheetOpener && document.contains(sheetOpener) && sheetOpener.offsetParent !== null) focusEl(sheetOpener);
+    sheetOpener = null;
   }
 
-  document.getElementById("closeSheet").addEventListener("click", closeBottomSheet);
+  $("closeSheet").addEventListener("click", () => closeBottomSheet());
 
   // Touch drag to dismiss
   let sheetStartY = 0, sheetCurrentY = 0, isDragging = false;
@@ -770,26 +871,23 @@ async function initMap() {
     bottomSheet.style.transform = "";
   });
 
-  // Map Click
-  function selectLocation(locId) {
-    const loc = locations.find((l) => l.id === locId);
-    if (loc) { openBottomSheet(loc); highlightLocation(locId); }
+  // ============================================================
+  // Selecting places (map click, lists, search, timeline, deep link)
+  // ============================================================
+  function ensureVisible(loc) {
+    if (locVisible(loc)) return;
+    // the era or the year slider is hiding it: show everything again
+    setEra("all", { quiet: true });
+    if (yearOn()) setYear(YEAR_MAX, { quiet: true });
   }
 
-  function highlightLocation(locId) {
-    drawLocations();
-    const loc = locations.find((l) => l.id === locId);
+  function selectLocation(locId, opts = {}) {
+    const loc = locationIndex[locId];
     if (!loc) return;
-    cityLayer.add(new Graphic({
-      geometry: new Point({ longitude: loc.lng, latitude: loc.lat }),
-      symbol: new SimpleMarkerSymbol({
-        style: "circle",
-        size: getLocationSize(loc.significance) + 12,
-        color: [201, 168, 76, 35],
-        outline: { color: [201, 168, 76, 200], width: 2 },
-      }),
-      attributes: { locId: loc.id, type: "highlight" },
-    }));
+    if (playing) pause();
+    ensureVisible(loc);
+    openBottomSheet(loc);
+    if (opts.zoom) view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 9) }, goOpts(600));
   }
 
   view.on("click", (event) => {
@@ -798,10 +896,10 @@ async function initMap() {
       if (cityGraphic) {
         const locId = cityGraphic.graphic.attributes.locId;
         selectLocation(locId);
-        const loc = locations.find((l) => l.id === locId);
-        if (loc) view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 9) }, { duration: 500 });
+        const loc = locationIndex[locId];
+        if (loc) view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 9) }, goOpts(500));
       } else if (!event.native.target.closest(".bottom-sheet")) {
-        closeBottomSheet();
+        closeBottomSheet({ silent: true });
       }
     });
   });
@@ -813,38 +911,387 @@ async function initMap() {
     () => { clearTimeout(zoomTimer); zoomTimer = setTimeout(() => drawLocations(), 150); }
   );
 
-  // Initial draw
-  refresh();
-  buildTimelinePanel();
-  buildFiguresPanel();
-}
+  // ============================================================
+  // Era chips
+  // ============================================================
+  const chips = document.querySelectorAll(".journey-chip");
 
-// ============================================================
-// Apply translations to static HTML elements
-// ============================================================
-function applyTranslations() {
-  const navLogo = document.getElementById("navLogo");
-  navLogo.setAttribute("heading", t("appTitle"));
-  navLogo.setAttribute("description", t("appSubtitle"));
+  function setEra(val, opts = {}) {
+    state.era = val === "all" ? "all" : parseInt(val, 10);
+    chips.forEach((c) => {
+      const on = c.dataset.era === String(state.era);
+      c.classList.toggle("active", on);
+      c.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (opts.quiet) { refresh(); syncUrl(); return; }
+    closeBottomSheet({ silent: true });
+    refresh();
+    syncUrl();
+    if (state.era !== "all") {
+      const eraLocations = locations.filter(locVisible);
+      if (eraLocations.length > 0) zoomToLocations(eraLocations);
+    } else {
+      view.goTo({ center: [-1.5, 52.0], zoom: 6 }, goOpts(800));
+    }
+  }
+  chips.forEach((chip) => chip.addEventListener("click", () => setEra(chip.dataset.era)));
 
-  document.getElementById("timelineBtnText").textContent = t("btnTimeline");
-  document.getElementById("figuresBtnText").textContent = t("btnFigures");
-  document.getElementById("namesBtnText").textContent = t("btnNames");
+  function zoomToLocations(locs) {
+    const lngs = locs.map((l) => l.lng);
+    const lats = locs.map((l) => l.lat);
+    view.goTo({
+      xmin: Math.min(...lngs) - 1, ymin: Math.min(...lats) - 1,
+      xmax: Math.max(...lngs) + 1, ymax: Math.max(...lats) + 1,
+      spatialReference: { wkid: 4326 },
+    }, goOpts(800));
+  }
 
-  const donateBtnText = document.getElementById("donateBtnText");
-  if (donateBtnText) donateBtnText.textContent = lang === "es" ? "Apoya" : "Support";
-  document.getElementById("btnDonate").setAttribute("title",
-    lang === "es" ? "Apoya este proyecto" : "Support this project");
+  // ============================================================
+  // Year slider + playback
+  // ============================================================
+  const slider = $("yearSlider");
+  let playing = false;
+  let playTimer = null;
+  let lastSig = "";
+  let lastYear = YEAR_MAX;
 
-  const langBtnText = document.getElementById("langBtnText");
-  if (langBtnText) langBtnText.textContent = lang === "en" ? "ES" : "EN";
+  function visibleSignature() {
+    let n = 0;
+    locations.forEach((l) => { n += locEvents(l).length; });
+    return `${state.era}|${n}`;
+  }
 
-  document.querySelectorAll(".journey-chip").forEach((chip) => {
-    const labelEl = chip.querySelector(".chip-label");
-    const key = labelEl?.dataset?.i18n;
-    if (key) labelEl.textContent = t(key);
+  function updateTicker(prevYear) {
+    const lo = Math.min(prevYear, state.year), hi = Math.max(prevYear, state.year);
+    const hits = timeline.filter((e) => e.year > lo && e.year <= hi || (lo === hi && e.year === hi));
+    const ticker = $("playTicker");
+    if (!yearOn()) { ticker.textContent = ""; return; }
+    if (hits.length) {
+      const e = hits[hits.length - 1];
+      const loc = locationIndex[e.locationId];
+      ticker.textContent = `${e.year}: ${evtTitle(loc, e)} (${locName(loc)})`;
+    }
+  }
+
+  function updateYearUi() {
+    const on = yearOn();
+    $("yearReadout").textContent = on ? String(state.year) : t("yearAll");
+    slider.value = String(state.year);
+    slider.setAttribute("aria-valuetext", on ? String(state.year) : t("yearAll"));
+    $("btnYearReset").hidden = !on;
+    const eraEl = $("eraReadout");
+    if (on) {
+      const id = eraForYear(state.year);
+      eraEl.textContent = `${t("eraNow")}: ${eraText(id, "shortName")}`;
+      eraEl.style.color = eraIndex[id].hexColor;
+    } else {
+      eraEl.textContent = "";
+    }
+  }
+
+  function setYear(y, opts = {}) {
+    const prev = lastYear;
+    state.year = Math.min(YEAR_MAX, Math.max(YEAR_MIN, Math.round(y)));
+    lastYear = state.year;
+    updateYearUi();
+    if (!opts.quiet) updateTicker(prev);
+    const sig = visibleSignature();
+    if (sig !== lastSig || opts.force) {
+      lastSig = sig;
+      refresh();
+      if (selectedLocation && bottomSheet.classList.contains("open")) {
+        if (locVisible(selectedLocation)) openBottomSheet(selectedLocation, { keepFocus: true, noFocus: true }); else closeBottomSheet({ silent: true });
+      }
+    }
+    syncUrl();
+  }
+
+  function setPlayingUi(on) {
+    $("playIcon").style.display = on ? "none" : "";
+    $("pauseIcon").style.display = on ? "" : "none";
+    $("btnPlay").setAttribute("aria-label", on ? t("pauseLabel") : t("playLabel"));
+    $("btnPlay").setAttribute("title", on ? t("pause") : t("play"));
+    $("btnPlay").classList.toggle("playing", on);
+  }
+
+  function play() {
+    if (playing) return;
+    closeBottomSheet({ silent: true });
+    togglePanel("timelinePanel", false, { quiet: true });
+    togglePanel("figuresPanel", false, { quiet: true });
+    togglePanel("locationsPanel", false, { quiet: true });
+    if (!yearOn() || state.year >= YEAR_MAX) { lastYear = YEAR_MIN - 1; setYear(YEAR_MIN, { force: true }); }
+    playing = true;
+    setPlayingUi(true);
+    // reduced motion: coarse steps, slower, so the map changes calmly
+    const step = reducedMotion.matches ? 10 : 1;
+    const ms = reducedMotion.matches ? 1400 : 90;
+    playTimer = setInterval(() => {
+      const next = Math.min(YEAR_MAX, state.year + step);
+      setYear(next);
+      if (next >= YEAR_MAX) pause();
+    }, ms);
+  }
+
+  function pause() {
+    playing = false;
+    clearInterval(playTimer);
+    setPlayingUi(false);
+  }
+
+  $("btnPlay").addEventListener("click", () => (playing ? pause() : play()));
+  slider.addEventListener("input", () => {
+    if (playing) pause();
+    setYear(parseInt(slider.value, 10));
+  });
+  $("btnYearReset").addEventListener("click", () => {
+    if (playing) pause();
+    setYear(YEAR_MAX, { force: true });
+    $("playTicker").textContent = "";
+    focusEl($("btnPlay"));
   });
 
-  document.getElementById("timelinePanelTitle").textContent = lang === "es" ? "Cronología Histórica" : "Historical Timeline";
-  document.getElementById("figuresPanelTitle").textContent = lang === "es" ? "Figuras Clave" : "Key Figures";
+  // ============================================================
+  // Name toggle
+  // ============================================================
+  const nameToggle = $("nameToggle");
+  const nameLabel = $("nameLabel");
+  let nameToggleTimeout;
+
+  $("btnToggleNames").addEventListener("click", () => {
+    showHistoricalNames = !showHistoricalNames;
+    nameLabel.textContent = showHistoricalNames ? t("showingHistorical") : t("showingModern");
+    nameToggle.classList.add("visible");
+    clearTimeout(nameToggleTimeout);
+    nameToggleTimeout = setTimeout(() => nameToggle.classList.remove("visible"), 2000);
+    drawLocations();
+  });
+
+  // ============================================================
+  // Language switch (in-app)
+  // ============================================================
+  $("btnLang").addEventListener("click", () => {
+    setLang(lang === "en" ? "es" : "en");
+    applyTranslations();
+    buildTimelinePanel();
+    buildFiguresPanel();
+    refresh();
+    updateYearUi();
+    setPlayingUi(playing);
+    buildSearchIndex();
+    if ($("searchInput").value) runSearch();
+    if (!$("infoOverlay").classList.contains("hidden")) fillInfoModal();
+    if (!$("donateOverlay").classList.contains("hidden")) fillDonateModal();
+    $("playTicker").textContent = "";
+    if (selectedLocation && bottomSheet.classList.contains("open")) openBottomSheet(selectedLocation, { keepFocus: true, noFocus: true });
+    writeUrl();
+  });
+
+  // ============================================================
+  // Share
+  // ============================================================
+  $("btnShare").addEventListener("click", async () => {
+    writeUrl();
+    const link = location.href;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast(t("shareCopied"));
+    } catch (e) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = link; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast(ok ? t("shareCopied") : t("shareFailed"));
+      } catch (e2) { toast(t("shareFailed")); }
+    }
+  });
+
+  // ============================================================
+  // Search (places, events, people; English and Spanish at once, accent-insensitive)
+  // ============================================================
+  let searchIndex = [];
+
+  function buildSearchIndex() {
+    searchIndex = [];
+    locations.forEach((loc) => {
+      searchIndex.push({
+        type: "place", loc,
+        text: fold(`${loc.name} ${loc.modernName} ${loc.region} ${allLocationText(loc.id)}`),
+      });
+      loc.events.forEach((evt) => {
+        searchIndex.push({
+          type: "event", loc, evt,
+          text: fold(`${evt.title} ${evt.description} ${evt.year} ${evt.figure || ""} ${loc.name} ${allEventText(loc.id, evt.year)}`),
+        });
+      });
+    });
+    figures.forEach((fig) => {
+      searchIndex.push({
+        type: "person", fig,
+        text: fold(`${fig.name} ${fig.role} ${fig.bio} ${fig.years} ${allFigureText(fig.id)}`),
+      });
+    });
+  }
+
+  const labelOf = (item) => item.type === "place" ? locName(item.loc) : item.type === "event" ? evtTitle(item.loc, item.evt) : item.fig.name;
+  const subOf = (item) =>
+    item.type === "place" ? `${t("typePlace")} · ${locModern(item.loc)}` :
+    item.type === "event" ? `${t("typeEvent")} · ${item.evt.year} · ${locName(item.loc)}` :
+    `${t("typePerson")} · ${figField(item.fig, "role")}`;
+
+  let results = [];
+  let active = -1;
+  const input = $("searchInput");
+  const resultsEl = $("searchResults");
+
+  function runSearch() {
+    const q = fold(input.value).trim();
+    if (!q) { closeResults(); return; }
+    const terms = q.split(/\s+/);
+    const base = { place: 30, person: 20, event: 10 };
+    results = searchIndex
+      .filter((it) => terms.every((term) => it.text.includes(term)))
+      .map((it) => {
+        const label = fold(labelOf(it));
+        let score = base[it.type];
+        if (label.includes(q)) score += 100;
+        if (label.startsWith(q)) score += 50;
+        return { it, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 12)
+      .map((r) => r.it);
+    active = results.length ? 0 : -1;
+    renderResults();
+  }
+
+  function renderResults() {
+    resultsEl.classList.remove("hidden");
+    input.setAttribute("aria-expanded", "true");
+    if (!results.length) {
+      resultsEl.innerHTML = `<li class="search-empty" role="presentation">${t("searchNone")}</li>`;
+      input.removeAttribute("aria-activedescendant");
+      return;
+    }
+    resultsEl.innerHTML = results.map((it, i) => `
+      <li id="sr-${i}" role="option" class="search-item${i === active ? " active" : ""}" aria-selected="${i === active}" data-i="${i}">
+        <span class="search-label">${labelOf(it)}</span>
+        <span class="search-sub">${subOf(it)}</span>
+      </li>`).join("");
+    input.setAttribute("aria-activedescendant", `sr-${active}`);
+  }
+
+  function closeResults() {
+    results = []; active = -1;
+    resultsEl.classList.add("hidden");
+    resultsEl.innerHTML = "";
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+  }
+
+  function pickResult(i) {
+    const it = results[i];
+    if (!it) return;
+    closeResults();
+    input.value = "";
+    if (it.type === "person") {
+      const loc = locationOfFigure(it.fig.id);
+      if (playing) pause();
+      togglePanel("figuresPanel", true, { quiet: true });
+      const card = document.querySelector(`.figure-card[data-figure="${it.fig.id}"]`);
+      if (card) {
+        card.scrollIntoView({ block: "center", behavior: reducedMotion.matches ? "auto" : "smooth" });
+        card.classList.add("flash");
+        setTimeout(() => card.classList.remove("flash"), 1800);
+        focusEl(card);
+      }
+      if (loc) {
+        ensureVisible(loc);
+        view.goTo({ center: [loc.lng, loc.lat], zoom: Math.max(view.zoom, 8) }, goOpts(600));
+      }
+    } else {
+      selectLocation(it.loc.id, { zoom: true });
+    }
+  }
+
+  input.addEventListener("input", runSearch);
+  input.addEventListener("focus", () => { if (input.value) runSearch(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      if (!results.length) return;
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + results.length) % results.length;
+      renderResults();
+      document.getElementById(`sr-${active}`)?.scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter") {
+      if (active >= 0) { e.preventDefault(); pickResult(active); }
+    }
+  });
+  resultsEl.addEventListener("mousedown", (e) => {
+    const li = e.target.closest(".search-item");
+    if (li) { e.preventDefault(); pickResult(parseInt(li.dataset.i, 10)); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".search-box")) closeResults(); });
+
+  // ============================================================
+  // Escape closes the top-most thing: window, search list, panel, then the place card
+  // ============================================================
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (openOverlays.length) { closeModal(openOverlays[openOverlays.length - 1]); return; }
+    if (!resultsEl.classList.contains("hidden")) { closeResults(); return; }
+    const panel = anyPanelOpen();
+    if (panel) { togglePanel(panel, false); return; }
+    if (bottomSheet.classList.contains("open")) { closeBottomSheet(); return; }
+    if (playing) pause();
+  });
+
+  // ============================================================
+  // Start up
+  // ============================================================
+  view.when(() => {
+    dismissSplash();
+    const init = readUrl();
+    state.era = init.era;
+    state.year = init.year;
+    lastYear = init.year;
+    chips.forEach((c) => {
+      const on = c.dataset.era === String(state.era);
+      c.classList.toggle("active", on);
+      c.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    lastSig = visibleSignature();
+    updateYearUi();
+    refresh();
+    if (state.era !== "all") {
+      const eraLocations = locations.filter(locVisible);
+      if (eraLocations.length) zoomToLocations(eraLocations);
+    }
+    if (init.loc) {
+      const loc = locationIndex[init.loc];
+      if (loc && locVisible(loc)) {
+        openBottomSheet(loc, { keepFocus: true });
+        view.goTo({ center: [loc.lng, loc.lat], zoom: 9 }, goOpts(0));
+      }
+    }
+    writeUrl();
+  }).catch((err) => {
+    console.error("MapView failed:", err);
+    showError(lang === "es" ? "El mapa no pudo cargarse." : "Map failed to load.");
+    dismissSplash();
+  });
+
+  buildTimelinePanel();
+  buildFiguresPanel();
+  buildSearchIndex();
+  setPlayingUi(false);
 }
+
+// ============================================================
+// Entry point (last, so every declaration above exists first)
+// ============================================================
+const rememberedLang = storedLang();
+if (rememberedLang) { setLang(rememberedLang); beginApp(); }
+else { setTimeout(() => document.querySelector(".lang-btn")?.focus(), 50); }
