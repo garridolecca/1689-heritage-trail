@@ -106,6 +106,7 @@ export const locations = [
         description:
           "A group within the JLJ church, convinced of believer's baptism, separates under John Spilsbury; this is traditionally counted as the first Particular Baptist congregation. They reject infant baptism while holding Calvinistic doctrine, which distinguishes them from the Arminian General Baptists. Accounts differ on details, and some say this group merged with another in 1638.",
         figure: "John Spilsbury",
+        disputed: true,
         source: "Themelios, 'Origins of the Particular Baptists'; sources agree on 1633 but differ on location and later merger.",
       },
     ],
@@ -126,6 +127,7 @@ export const locations = [
         description:
           "Tradition places John Spilsbury's Particular Baptist congregation, practising believer's baptism by immersion, at Old Gravel Lane, Wapping, and counts it among the seven churches that issued the 1644 First London Confession. A recent scholarly article questions the explicit link between Spilsbury and Wapping, so the origins are murkier than the traditional story.",
         figure: "John Spilsbury",
+        disputed: true,
         source: "Hercules Collins is described as the third pastor of this church after Spilsbury; the Spilsbury–Wapping link is questioned in a 2023 Baptist Quarterly article (doi 10.1080/0005576X.2023.2247693).",
       },
       {
@@ -232,6 +234,7 @@ export const locations = [
         description:
           "Local Baptist tradition dates a dissenting congregation in the remote Olchon Valley to 1633. The valley's isolation is said to have helped preserve dissenting worship through the years of persecution. These claims rest on local tradition and could not be corroborated in the sources checked.",
         figure: null,
+        disputed: true,
         source: "Not corroborated: the earlier claims of Lollard activity and attendance at the 1653 Abergavenny meeting were removed.",
       },
     ],
@@ -273,6 +276,15 @@ export const locations = [
           "A deed of 1623 conveying property to the local Baptist cause is the earliest documentary evidence for the Tewkesbury congregation, one of the oldest Baptist churches in Britain; its exact founding date is unknown. The Old Baptist Chapel, a late medieval house converted to a chapel around 1690, stands off an alleyway running from Church Street towards the river.",
         figure: null,
         source: "Tewkesbury Baptist Church history; Historic England listing. The '175 years of continuous use' claim was removed.",
+      },
+      {
+        year: 1655,
+        title: "A Founding Church of the Midland Association",
+        description:
+          "Tewkesbury is named by Ivey among the seven churches that formed the Midland Association in 1655. Ivey also argues that Tewkesbury, Hereford, Moreton and Leominster may share an origin with the Olchon church on the Welsh border.",
+        figure: null,
+        disputed: true,
+        source: "Ivey, History of the Midland Association (chapter 6). The Olchon link is Ivey's argument, not an established fact.",
       },
     ],
   },
@@ -481,6 +493,7 @@ export const locations = [
         description:
           "Llanwenarth is founded in 1652 and is among the oldest continuing Baptist fellowships in Wales; Ilston (1649) and Olchon (traditionally 1633) have earlier dates, so “oldest” is disputed. The present chapel building dates from 1695 (some sources say 1696), later remodelled, and is often called the oldest Baptist chapel building in Wales, still standing in the village of Govilon. The church's own history says the Welsh Baptist Union was formed there in 1866.",
         figure: null,
+        disputed: true,
         source: "Wikipedia and Coflein (built 1695); Llanwenarth church history. The earlier claim of an association meeting there in 1700 was removed.",
       },
     ],
@@ -941,6 +954,65 @@ export const locations = [
 
   // ===== Added in the 2026-11 expansion: Wales, the eighteenth century, North America, India =====
   {
+    id: "wells",
+    name: "Wells — Western Association",
+    modernName: "Wells, Somerset",
+    region: "South West",
+    lat: 51.209,
+    lng: -2.647,
+    significance: "moderate",
+    events: [
+      {
+        year: 1653,
+        title: "The Western Association First Meets",
+        description:
+          "In November 1653 Particular Baptist messengers from Somerset and neighbouring Wiltshire, Devon, Gloucestershire and Dorset meet at Wells. Thomas Collier, who led the association from 1653 to 1659, was its best-known figure. The meeting began a series of gatherings that tied scattered churches together before the Restoration.",
+        figure: null,
+        disputed: true,
+        source: "Goadby, Bye-Paths in Baptist History, ch. 8; Journal of Ecclesiastical History, 'The Baptist Western Association 1653–1658'. Sources differ on the day (6–7 or 8–9 of the ninth month), so only the month is given.",
+      },
+    ],
+  },
+  {
+    id: "bridgwater",
+    name: "Bridgwater — The Somerset Confession",
+    modernName: "Bridgwater, Somerset",
+    region: "South West",
+    lat: 51.128,
+    lng: -3.003,
+    significance: "minor",
+    events: [
+      {
+        year: 1656,
+        title: "The Somerset Confession Is Approved",
+        description:
+          "At a meeting in Bridgwater in September 1656 the Western Association approves a Confession of Faith, usually called the Somerset Confession. It shows a regional Baptist body stating its beliefs in its own words, alongside the London churches.",
+        figure: null,
+        source: "Goadby, Bye-Paths in Baptist History, ch. 8; Journal of Ecclesiastical History on the Western Association. Who drafted it is not settled here.",
+      },
+    ],
+  },
+  {
+    id: "warwick",
+    name: "Warwick — Midland Association",
+    modernName: "Warwick, Warwickshire",
+    region: "Midlands",
+    lat: 52.282,
+    lng: -1.585,
+    significance: "moderate",
+    events: [
+      {
+        year: 1655,
+        title: "The Midland Association Is Formed",
+        description:
+          "In 1655 Particular Baptist churches of the Midlands meet at Warwick and form an association. Ivey names the seven founding churches as Warwick, Derby, Burton, Moreton-in-Marsh, Tewkesbury, Hook Norton and Alcester. The articles were taken back to each church for approval and the churches met again at Moreton-in-Marsh.",
+        figure: null,
+        disputed: true,
+        source: "Goadby, Bye-Paths in Baptist History, ch. 8; Ivey, History of the Midland Association. Sources date the Moreton meeting 26 June or 26 April 1655, so only the year is given.",
+      },
+    ],
+  },
+  {
     id: "ilston",
     name: "Ilston — John Myles's Church",
     modernName: "Ilston, Gower, Swansea, Wales",
@@ -955,6 +1027,7 @@ export const locations = [
         description:
           "John Myles, with Thomas Proud, gathers a Baptist church at Ilston on the Gower peninsula in 1649, usually described as the first Baptist church in Wales. Its minute book, the Ilston Book, survives and records baptisms, church discipline and the rise of Baptist work across south Wales. After the Restoration Myles left for America, where he helped found a Baptist church in Massachusetts.",
         figure: "John Myles",
+        disputed: true,
         source: "Wikipedia, John Myles and Ilston; the Ilston Book. 'First in Wales' is the usual description and is disputed: Olchon (traditionally 1633) is said to be earlier.",
       },
     ],

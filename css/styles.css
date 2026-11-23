@@ -627,3 +627,5 @@ button:focus-visible, [tabindex]:focus-visible, .search-input:focus-visible, .ye
   .print-sheet .stop { page-break-inside: avoid; border-bottom: 1px solid #ccc; padding-bottom: 6pt; }
   .print-sheet .src { font-size: 9pt; color: #555; }
 }
+
+.disputed-tag { display:inline-block; margin:2px 0 6px; padding:1px 8px; font-size:0.68rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--gold-dim); border:1px solid var(--gold-dim); border-radius:999px; }

@@ -974,6 +974,7 @@ async function initMap() {
         <div class="event-card" data-era="${event.era}">
           <div class="event-era-tag">${event.year} &bull; ${eraShort} &bull; ${eraDate}</div>
           <div class="event-action">${evtTitle(loc, event)}</div>
+          ${event.disputed ? `<span class="disputed-tag" title="${esc(t("disputedTip"))}">${esc(t("disputedLabel"))}</span>` : ""}
           <p class="event-description">${evtDesc(loc, event)}</p>
           ${event.figure ? `<span class="event-figure-tag">${event.figure}</span>` : ""}
           ${src ? `<p class="event-source"><span>${t("sourceLabel")}</span> ${src}</p>` : ""}

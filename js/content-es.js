@@ -135,6 +135,26 @@ export const eventsEs = {
     description: "El 14 y 15 de julio de 1653 se reúnen en Abergavenny mensajeros de varias iglesias bautistas, la reunión de asociación bautista galesa más antigua registrada por Joshua Thomas, que contó cinco iglesias presentes. Siguió a reuniones anteriores del grupo de Ilston en Carmarthen (1651). La palabra «asociación» es un uso posterior de Thomas y no aparece en los registros originales.",
     source: "Joshua Thomas, History of the Baptist Association in Wales; artículo del Journal of Ecclesiastical History sobre los Bautistas Particulares 1644–1660. Se eliminó la lista anterior de iglesias por no estar verificada.",
   },
+  "wells:1653": {
+    title: "Se reúne por primera vez la Asociación del Oeste",
+    description: "En noviembre de 1653 mensajeros Bautistas Particulares de Somerset y de los vecinos Wiltshire, Devon, Gloucestershire y Dorset se reúnen en Wells. Thomas Collier, que dirigió la asociación de 1653 a 1659, fue su figura más conocida. La reunión inició una serie de encuentros que unieron a iglesias dispersas antes de la Restauración.",
+    source: "Goadby, Bye-Paths in Baptist History, cap. 8; Journal of Ecclesiastical History, «The Baptist Western Association 1653–1658». Las fuentes difieren en el día (6–7 u 8–9 del noveno mes), por eso solo se da el mes.",
+  },
+  "bridgwater:1656": {
+    title: "Se aprueba la Confesión de Somerset",
+    description: "En una reunión en Bridgwater en septiembre de 1656 la Asociación del Oeste aprueba una Confesión de Fe, llamada habitualmente Confesión de Somerset. Muestra a un organismo bautista regional exponiendo sus creencias con sus propias palabras, junto a las iglesias de Londres.",
+    source: "Goadby, Bye-Paths in Baptist History, cap. 8; Journal of Ecclesiastical History sobre la Asociación del Oeste. Aquí no se da por resuelto quién la redactó.",
+  },
+  "warwick:1655": {
+    title: "Se forma la Asociación de los Midlands",
+    description: "En 1655 iglesias Bautistas Particulares de los Midlands se reúnen en Warwick y forman una asociación. Ivey nombra siete iglesias fundadoras: Warwick, Derby, Burton, Moreton-in-Marsh, Tewkesbury, Hook Norton y Alcester. Los artículos se llevaron a cada iglesia para su aprobación y las iglesias volvieron a reunirse en Moreton-in-Marsh.",
+    source: "Goadby, Bye-Paths in Baptist History, cap. 8; Ivey, History of the Midland Association. Las fuentes fechan la reunión de Moreton el 26 de junio o el 26 de abril de 1655, por eso solo se da el año.",
+  },
+  "tewkesbury:1655": {
+    title: "Iglesia fundadora de la Asociación de los Midlands",
+    description: "Ivey menciona a Tewkesbury entre las siete iglesias que formaron la Asociación de los Midlands en 1655. Ivey sostiene además que Tewkesbury, Hereford, Moreton y Leominster pudieron compartir origen con la iglesia de Olchon, en la frontera galesa.",
+    source: "Ivey, History of the Midland Association (cap. 6). El vínculo con Olchon es un argumento de Ivey, no un hecho establecido.",
+  },
   "abingdon:1652": {
     title: "Se forma la Asociación de Berkshire",
     description: "El 8 de octubre de 1652 iglesias Bautistas Particulares de Berkshire y de los condados vecinos se reúnen y forman una asociación de apoyo mutuo, responsabilidad doctrinal y testimonio compartido. Es la precursora del organismo conocido después como la Asociación de Abingdon, cuyas reuniones en Abingdon se datan desde 1656 aproximadamente. Asociaciones como esta sostuvieron a las iglesias en los años de persecución.",
