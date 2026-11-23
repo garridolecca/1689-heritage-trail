@@ -2,10 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a1119" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="1689 Heritage Trail — Particular Baptist History" />
+    <meta property="og:description" content="Map, timeline and Confession explorer for the Particular Baptists, from the 1644 Confession to Spurgeon. English and Spanish." />
+    <meta property="og:url" content="https://garridolecca.github.io/1689-heritage-trail/" />
+    <meta property="og:image" content="https://garridolecca.github.io/1689-heritage-trail/icon.svg" />
+    <meta name="twitter:card" content="summary" />
     <meta name="description" content="Interactive historical atlas of Particular Baptist heritage in England — centered on the 1689 Second London Baptist Confession of Faith." />
     <title>1689 Heritage Trail — Particular Baptist History</title>
 
@@ -13,22 +22,23 @@
     <script type="module" src="https://js.arcgis.com/5.0/"></script>
     <link rel="stylesheet" href="https://js.arcgis.com/5.0/esri/themes/dark/main.css" />
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <!-- Fonts are self-hosted (css/fonts.css): no third-party font requests -->
+    <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/fonts.css" />
 
     <!-- App Styles -->
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
   <body class="calcite-mode-dark">
+    <a class="skip-link" href="#main" id="skipLink">Skip to the map</a>
+    <h1 class="sr-only" id="appH1">1689 Heritage Trail — Particular Baptist History</h1>
 
     <!-- ==================== LANGUAGE SELECTOR ==================== -->
     <div id="langSelector" class="lang-selector">
       <div class="lang-content">
         <div class="lang-cross" aria-hidden="true">&#10013;</div>
-        <h1 class="lang-title">1689 Heritage Trail<br><span class="lang-title-es">Ruta del Patrimonio 1689</span></h1>
+        <p class="lang-title">1689 Heritage Trail<br><span class="lang-title-es">Ruta del Patrimonio 1689</span></p>
         <p class="lang-subtitle">Choose your language / Elige tu idioma</p>
         <div class="lang-buttons">
           <button class="lang-btn" data-lang="en" type="button">
@@ -47,7 +57,7 @@
     <div id="splash" class="splash hidden">
       <div class="splash-content">
         <div class="splash-cross" aria-hidden="true">&#10013;</div>
-        <h1 id="splashTitle" class="splash-title">1689 Heritage Trail</h1>
+        <p id="splashTitle" class="splash-title">1689 Heritage Trail</p>
         <p id="splashSubtitle" class="splash-subtitle">Particular Baptist History</p>
         <div class="splash-verse">
           <span id="splashVerse">"Contend earnestly for the faith which was once for all delivered to the saints."</span>
@@ -75,6 +85,7 @@
         <div slot="content-end" class="header-actions">
           <calcite-button id="btnTimeline" appearance="transparent" icon-start="clock" kind="neutral" scale="s" class="header-btn" aria-controls="timelinePanel"><span id="timelineBtnText">Timeline</span></calcite-button>
           <calcite-button id="btnFigures" appearance="transparent" icon-start="users" kind="neutral" scale="s" class="header-btn" aria-controls="figuresPanel"><span id="figuresBtnText">Figures</span></calcite-button>
+          <calcite-button id="btnConfession" appearance="transparent" icon-start="book" kind="neutral" scale="s" class="header-btn" aria-controls="confessionPanel"><span id="confessionBtnText">Confession</span></calcite-button>
           <calcite-button id="btnToggleNames" appearance="transparent" icon-start="label" kind="neutral" scale="s" class="header-btn"><span id="namesBtnText">Names</span></calcite-button>
           <calcite-button id="btnShare" appearance="transparent" icon-start="link" kind="neutral" scale="s" class="header-btn"><span id="shareBtnText">Share</span></calcite-button>
           <calcite-button id="btnDonate" appearance="transparent" icon-start="heart" kind="neutral" scale="s" class="header-btn header-btn-donate" title="Support this project"><span id="donateBtnText">Support</span></calcite-button>
@@ -113,6 +124,10 @@
             <input id="searchInput" class="search-input" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchResults" autocomplete="off" spellcheck="false" placeholder="Search places, events, people…" />
             <ul id="searchResults" class="search-results hidden" role="listbox"></ul>
           </div>
+          <button id="btnLineage" class="tool-btn" type="button" aria-controls="lineagePanel" aria-expanded="false">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 1a2 2 0 0 1 .5 3.93V7h3.25A1.25 1.25 0 0 1 13 8.25v1.82a2 2 0 1 1-1 0V8.25a.25.25 0 0 0-.25-.25H8.5v2.07a2 2 0 1 1-1 0V8H4.25a.25.25 0 0 0-.25.25v1.82a2 2 0 1 1-1 0V8.25A1.25 1.25 0 0 1 4.25 7H7.5V4.93A2 2 0 0 1 8 1z"/></svg>
+            <span id="lineageBtnText">Lineage</span>
+          </button>
           <button id="btnLocations" class="tool-btn" type="button" aria-controls="locationsPanel" aria-expanded="false">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 3h12v1.2H2V3zm0 4.4h12v1.2H2V7.4zm0 4.4h12V13H2v-1.2z"/></svg>
             <span id="locationsBtnText">Places</span>
@@ -121,7 +136,7 @@
       </div>
 
       <!-- ===== MAP ===== -->
-      <div id="viewDiv" role="application" aria-label="Map"></div>
+      <main id="main" tabindex="-1"><div id="viewDiv" role="application" aria-label="Map"></div></main>
 
       <!-- ===== INFO OVERLAY ===== -->
       <div id="infoOverlay" class="modal-overlay hidden">
@@ -155,7 +170,7 @@
             </div>
             <div class="donate-qr-section">
               <p class="donate-qr-label" id="donateQrLabel">Or scan this QR code (Venmo):</p>
-              <img class="donate-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://venmo.com/u/garridolecca&bgcolor=2d2329&color=C9A84C" alt="Venmo QR Code" width="150" height="150" />
+              <img class="donate-qr" src="img/venmo-qr.svg" alt="Venmo QR Code" width="150" height="150" />
             </div>
             <div class="donate-divider"></div>
             <div class="donate-email">
@@ -193,8 +208,36 @@
           <h3 id="locationsPanelTitle">All Places</h3>
           <calcite-button id="closeLocations" appearance="transparent" icon-start="x" kind="neutral" scale="s" label="Close"></calcite-button>
         </div>
+        <div class="panel-tools">
+          <div id="regionBtns" class="region-btns" role="group"></div>
+          <div class="panel-actions">
+            <button id="btnGeojson" class="tool-btn" type="button"><span id="geojsonBtnText">GeoJSON</span></button>
+            <button id="btnPrint" class="tool-btn" type="button"><span id="printBtnText">Print itinerary</span></button>
+          </div>
+        </div>
         <div id="locationsContent" class="chapter-list"></div>
       </div>
+
+      <!-- ===== CONFESSION PANEL (1689 chapter explorer) ===== -->
+      <div id="confessionPanel" class="scripture-panel hidden" role="region" aria-labelledby="confessionPanelTitle">
+        <div class="scripture-panel-header">
+          <h3 id="confessionPanelTitle">The 1689 Confession</h3>
+          <calcite-button id="closeConfession" appearance="transparent" icon-start="x" kind="neutral" scale="s" label="Close"></calcite-button>
+        </div>
+        <div id="confessionContent" class="chapter-list"></div>
+      </div>
+
+      <!-- ===== LINEAGE PANEL (church families and pastor succession) ===== -->
+      <div id="lineagePanel" class="scripture-panel hidden" role="region" aria-labelledby="lineagePanelTitle">
+        <div class="scripture-panel-header">
+          <h3 id="lineagePanelTitle">Church Families</h3>
+          <calcite-button id="closeLineage" appearance="transparent" icon-start="x" kind="neutral" scale="s" label="Close"></calcite-button>
+        </div>
+        <div id="lineageContent" class="chapter-list"></div>
+      </div>
+
+      <!-- ===== PRINT SHEET (shown only when printing) ===== -->
+      <section id="printSheet" class="print-sheet" aria-hidden="true"></section>
 
       <!-- ===== BOTTOM SHEET (location details) ===== -->
       <div id="bottomSheet" class="bottom-sheet" role="region" aria-labelledby="sheetLocationName">

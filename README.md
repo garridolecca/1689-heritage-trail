@@ -21,6 +21,12 @@ An interactive historical atlas tracing the Particular Baptist heritage across E
 - **Year bar with Play / Pause (1612–1892)**: drag the slider or press Play and locations, routes and events appear as their dates are reached; the current era and the latest event are shown
 - **Deep links**: `?lang=`, `era=`, `year=` and `loc=` are kept in the address bar as you navigate, and a **Share** button copies the link
 - Language is remembered between visits (the splash chooser is skipped on return; switch any time with the ES / EN button)
+- **Confession explorer**: a short guide to each of the 32 chapters of the 1689 Confession (summary, representative Scripture texts opening in Logos, comparison with Westminster 1646 and Savoy 1658, linked map stops). Summaries are written for this app, not quoted.
+- **Lineage panel**: six church families followed through their pastors (Horsleydown to the Tabernacle, Bristol, the mission circle, the Atlantic family and more)
+- **Beyond Britain**: Ilston, Pennepek, the Welsh Tract, Philadelphia, Charleston and Serampore, with Britain / North America / India quick views
+- **Export and print**: download the places on screen as GeoJSON, or print an itinerary for the current filters
+- **Then and now**: a few places note the congregation or institution that continues today
+- Installable and works offline (service worker); fonts and the QR code are self-hosted, so no third-party requests besides Esri
 - Timeline panel, Key Figures panel and an "All Places" list that works as a keyboard alternative to the map markers
 - Each card carries a **source note** where a point was corrected, is debated or is cautiously worded
 - Support / contact window and a "How to use" section (English and Spanish)
@@ -38,6 +44,8 @@ Controls have accessible names, windows trap and restore focus, **Escape** close
 - **GitHub Pages**: static hosting
 
 Files: `js/data.js` (locations, events, figures, routes), `js/content-es.js` (Spanish text for events and figures), `js/i18n.js` (interface text and language handling), `js/app.js` (map and UI).
+
+Check the data with `node validate.mjs` (unique ids, era matches year, Spanish text present, route vertices match places, decade gaps).
 
 Run it locally with any static server, for example `python -m http.server 5192`, then open `http://localhost:5192/`.
 

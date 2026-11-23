@@ -164,6 +164,7 @@ export const locations = [
         description:
           "Seven Particular Baptist churches in London, including Devonshire Square, sign the First London Baptist Confession of Faith (1LCF). The confession distinguishes Particular Baptists from the General Baptists and from the feared Anabaptists of Münster, affirming Calvinist doctrine with believer's baptism.",
         figure: "William Kiffin",
+        source: "Wikipedia, First London Confession of Faith (1644, seven London churches); the comparison with Münster follows the Confession's own preface.",
       },
     ],
   },
@@ -204,6 +205,14 @@ export const locations = [
           "Dorothy Hazzard (formerly Kelly), who in 1640 marries the Puritan preacher Matthew Hazzard, and four other dissenters found the first dissenting church in Bristol; it later became a Baptist church. In 1679 Edward Terrill gives a deed of gift that funds ministerial training; the academy that grew from it, Bristol Baptist College, is commonly described as the oldest Baptist theological college in the world, with its work beginning in earnest under Bernard Foskett from 1720.",
         figure: "Dorothy Hazzard",
         source: "Wikipedia, Dorothy Hazzard and Broadmead Baptist Church; Baptist Quarterly on Terrill's 1679 deed. 'Oldest in the world' is the usual description, not independently verified.",
+      },
+      {
+        year: 1720,
+        title: "Foskett and the Bristol Academy",
+        description:
+          "Bernard Foskett becomes pastor of Broadmead in 1720 and also takes charge of the academy funded under Edward Terrill's 1679 deed. Under him the school trains a stream of Baptist ministers for the West Country and beyond, among them Benjamin Beddome.",
+        figure: null,
+        source: "Wikipedia, Bristol Baptist College and Bernard Foskett (1720). The list of students is kept to one well-attested name.",
       },
     ],
   },
@@ -292,6 +301,7 @@ export const locations = [
         description:
           "Hercules Collins, pastor of the Wapping church, is imprisoned in Newgate from 1683 to 1684 for nonconformist worship, part of the wider crackdown on Dissenters under Charles II. He continues to write during his imprisonment.",
         figure: "Hercules Collins",
+        source: "Wikipedia, Hercules Collins (imprisoned in Newgate 1683–1684).",
       },
     ],
   },
@@ -467,9 +477,9 @@ export const locations = [
       {
         era: 2,
         year: 1652,
-        title: "Oldest Surviving Welsh Baptist Fellowship",
+        title: "Llanwenarth: An Early Welsh Baptist Fellowship",
         description:
-          "Llanwenarth is founded in 1652 as the oldest continuing Baptist fellowship in Wales. The present chapel building dates from 1695 (some sources say 1696), later remodelled, and it is the oldest Baptist chapel in Wales, still standing in the village of Govilon. The church's own history says the Welsh Baptist Union was formed there in 1866.",
+          "Llanwenarth is founded in 1652 and is among the oldest continuing Baptist fellowships in Wales; Ilston (1649) and Olchon (traditionally 1633) have earlier dates, so “oldest” is disputed. The present chapel building dates from 1695 (some sources say 1696), later remodelled, and is often called the oldest Baptist chapel building in Wales, still standing in the village of Govilon. The church's own history says the Welsh Baptist Union was formed there in 1866.",
         figure: null,
         source: "Wikipedia and Coflein (built 1695); Llanwenarth church history. The earlier claim of an association meeting there in 1700 was removed.",
       },
@@ -527,11 +537,19 @@ export const locations = [
       {
         era: 2,
         year: 1652,
-        title: "Abingdon Association Begins",
+        title: "The Berkshire Association Is Formed",
         description:
-          "The Abingdon Association of Particular Baptist churches, drawing churches from Berkshire, Oxfordshire, Buckinghamshire, Hertfordshire, Bedfordshire and Hampshire, begins its life in October 1652. Associations like this one provided mutual support, doctrinal accountability and collective witness during the years of persecution.",
+          "On 8 October 1652 Particular Baptist churches of Berkshire and the neighbouring counties meet and form an association for mutual support, doctrinal accountability and shared witness. It is the forerunner of the body later known as the Abingdon Association, whose meetings at Abingdon are dated from about 1656. Associations like this one sustained the churches through the years of persecution.",
         figure: null,
-        source: "Baptist Historical Society records (B. R. White, The Abingdon Association). The claim of 'five regional associations by the 1650s' was removed.",
+        source: "B. R. White, The Abingdon Association; Baptist Historical Society. Corrected: 1652 is the Berkshire Association; the Abingdon meetings begin about 1656 (see below). The claim of 'five regional associations by the 1650s' was removed.",
+      },
+      {
+        year: 1656,
+        title: "The Abingdon Association Meets",
+        description:
+          "Churches of the region meet at Abingdon in September 1656 and give the association the name by which it is best known. Its circular letters from this time show Particular Baptist churches caring for one another's doctrine and discipline under the Commonwealth.",
+        figure: null,
+        source: "B. R. White, The Abingdon Association; Baptist Historical Society. The September 1656 date is the usual one for the Abingdon meetings.",
       },
     ],
   },
@@ -594,6 +612,22 @@ export const locations = [
           "The Toleration Act receives royal assent on 24 May 1689, allowing freedom of worship to Protestant Dissenters, such as Baptists, who take the oaths of allegiance and supremacy and reject transubstantiation. After decades of persecution under the Clarendon Code (the Corporation Act of 1661, Act of Uniformity of 1662, Conventicle Acts of 1664 and 1670, and Five Mile Act of 1665), Dissenters can register their own meeting houses, though they remain barred from public office and the universities.",
         figure: null,
         source: "Wikipedia, Toleration Act 1688 (royal assent 24 May 1689).",
+      },
+      {
+        year: 1662,
+        title: "Act of Uniformity and the Great Ejection",
+        description:
+          "The Act of Uniformity (1662) requires every minister to use the Book of Common Prayer and to be episcopally ordained. On St Bartholomew's Day, 24 August 1662, about two thousand clergy who will not conform are ejected from their livings. With the Corporation Act (1661), the Conventicle Act (1664) and the Five Mile Act (1665) it forms the Clarendon Code, which pushes Baptists and other Dissenters into secret meetings, fines and prison.",
+        figure: null,
+        source: "Wikipedia, Act of Uniformity 1662 and Great Ejection (about 2,000 ministers; 24 August 1662). The figure is the usual round number.",
+      },
+      {
+        year: 1672,
+        title: "Declaration of Indulgence",
+        description:
+          "On 15 March 1672 Charles II issues a Declaration of Indulgence suspending the penal laws against Dissenters and allowing licensed meeting places. Many Baptist congregations license preachers and houses. Parliament forces the king to withdraw it in 1673 and passes the Test Act, so the relief is brief.",
+        figure: null,
+        source: "Wikipedia, Declaration of Indulgence (1672) and Test Act 1673. The number of Baptist licences is not given because sources differ.",
       },
     ],
   },
@@ -717,6 +751,14 @@ export const locations = [
         figure: "Andrew Fuller",
         source: "Our Christian Heritage (Carey Mission House); BMS World Mission; Christian Today (the £13 2s 6d pledged).",
       },
+      {
+        year: 1815,
+        title: "Andrew Fuller Dies at Kettering",
+        description:
+          "Andrew Fuller, pastor at Kettering since 1782 and Secretary of the Baptist Missionary Society from its start, dies on 7 May 1815. His writings, above all 'The Gospel Worthy of All Acceptation', gave the missionary movement its theology: that the gospel is to be offered freely to all, and that those who hear are bound to believe it.",
+        figure: "Andrew Fuller",
+        source: "Wikipedia, Andrew Fuller (died 7 May 1815).",
+      },
     ],
   },
   {
@@ -837,6 +879,14 @@ export const locations = [
         figure: "Charles Haddon Spurgeon",
         source: "Wikipedia, Charles Spurgeon (April 1854, age 19; Exeter Hall, then Surrey Gardens). The earlier text had the two halls in the wrong order.",
       },
+      {
+        year: 1856,
+        title: "Spurgeon Founds the Pastors' College",
+        description:
+          "Spurgeon begins training a young man for ministry in 1855, and by 1856 the work has become the Pastors' College, supported by his congregation and by the sale of his sermons. It trains preachers from modest backgrounds, and it continues today as Spurgeon's College in London.",
+        figure: "Charles Haddon Spurgeon",
+        source: "Wikipedia, Spurgeon's College (training began 1855; the College dated from 1856). Exact first-student details omitted.",
+      },
     ],
   },
   {
@@ -885,6 +935,187 @@ export const locations = [
           "Benjamin Keach is born on 29 February 1640 at Stoke Hammond, Buckinghamshire. He begins preaching at 18 and ministers at Winslow before persecution drives him to London, where he becomes one of the most important Particular Baptist pastors of the 17th century. His Horsleydown congregation is a direct ancestor of Spurgeon's Metropolitan Tabernacle.",
         figure: "Benjamin Keach",
         source: "Wikipedia, Benjamin Keach; Metropolitan Tabernacle.",
+      },
+    ],
+  },
+
+  // ===== Added in the 2026-11 expansion: Wales, the eighteenth century, North America, India =====
+  {
+    id: "ilston",
+    name: "Ilston — John Myles's Church",
+    modernName: "Ilston, Gower, Swansea, Wales",
+    region: "Wales",
+    lat: 51.585,
+    lng: -4.12,
+    significance: "moderate",
+    events: [
+      {
+        year: 1649,
+        title: "John Myles Gathers the Ilston Church",
+        description:
+          "John Myles, with Thomas Proud, gathers a Baptist church at Ilston on the Gower peninsula in 1649, usually described as the first Baptist church in Wales. Its minute book, the Ilston Book, survives and records baptisms, church discipline and the rise of Baptist work across south Wales. After the Restoration Myles left for America, where he helped found a Baptist church in Massachusetts.",
+        figure: "John Myles",
+        source: "Wikipedia, John Myles and Ilston; the Ilston Book. 'First in Wales' is the usual description and is disputed: Olchon (traditionally 1633) is said to be earlier.",
+      },
+    ],
+  },
+  {
+    id: "little-prescot",
+    name: "Little Prescot Street Chapel",
+    modernName: "Goodman's Fields, Whitechapel, London",
+    region: "London",
+    lat: 51.5105,
+    lng: -0.0715,
+    significance: "minor",
+    events: [
+      {
+        year: 1769,
+        title: "Abraham Booth Called to Prescot Street",
+        description:
+          "Abraham Booth, a self-taught former weaver and the author of 'The Reign of Grace' (1768), is ordained in 1769 as pastor of the Particular Baptist church meeting in Little Prescot Street, Goodman's Fields, and serves there until his death in 1806. A defender of grace preaching, he also wrote 'Pedobaptism Examined' (1784) and helped begin the academy that became Stepney College.",
+        figure: "Abraham Booth",
+        source: "Wikipedia, Abraham Booth (ordained 1769; died 1806). The link to Stepney College is stated in general terms only.",
+      },
+    ],
+  },
+  {
+    id: "bourton",
+    name: "Bourton-on-the-Water Baptist Church",
+    modernName: "Bourton-on-the-Water, Gloucestershire",
+    region: "South West",
+    lat: 51.885,
+    lng: -1.76,
+    significance: "minor",
+    events: [
+      {
+        year: 1743,
+        title: "Benjamin Beddome Ordained at Bourton",
+        description:
+          "Benjamin Beddome, born in 1717 and trained at the Bristol Baptist academy, is ordained in 1743 as pastor at Bourton-on-the-Water, where he serves until his death in 1795. He is remembered for the hymns he wrote to accompany his sermons, among them 'Let party names no more'. His long ministry shows a settled Particular Baptist church life in the Cotswolds during the eighteenth century.",
+        figure: "Benjamin Beddome",
+        source: "Wikipedia, Benjamin Beddome (ordained 1743; died 1795). Bristol training stated in general terms.",
+      },
+    ],
+  },
+  {
+    id: "olney",
+    name: "Olney Baptist Church",
+    modernName: "Olney, Buckinghamshire",
+    region: "South East",
+    lat: 52.152,
+    lng: -0.702,
+    significance: "minor",
+    events: [
+      {
+        year: 1784,
+        title: "Sutcliff and the Call to Prayer",
+        description:
+          "John Sutcliff, pastor at Olney from 1775 until his death in 1814, proposes at the Northamptonshire Association meeting in 1784 a monthly prayer meeting for the revival of religion, drawing on Jonathan Edwards's 'Humble Attempt'. Eight years later several of the same men, Sutcliff among them, were present when the Baptist Missionary Society began at Kettering.",
+        figure: "John Sutcliff",
+        source: "Wikipedia, John Sutcliff (pastor at Olney 1775–1814; the 1784 prayer call). Wording on the Association meeting is kept general.",
+      },
+    ],
+  },
+  {
+    id: "pennepek",
+    name: "Pennepek (Lower Dublin) Baptist Church",
+    modernName: "Lower Dublin, Philadelphia, Pennsylvania, USA",
+    region: "North America",
+    lat: 40.07,
+    lng: -75.03,
+    significance: "moderate",
+    events: [
+      {
+        year: 1688,
+        title: "Elias Keach and the Pennepek Church",
+        description:
+          "Elias Keach, son of Benjamin Keach of London, arrives in the Pennsylvania colony in 1686 and gathers a Baptist church at Pennepek, now Lower Dublin, in 1688. It is often counted among the oldest Baptist churches in the Middle Colonies, and it became a founding member of the Philadelphia Baptist Association.",
+        figure: "Elias Keach",
+        source: "Wikipedia, Elias Keach and Lower Dublin Baptist Church. 'Among the oldest' is the usual wording; the 1688 date is the church's own.",
+      },
+    ],
+  },
+  {
+    id: "welsh-tract",
+    name: "Welsh Tract Baptist Church",
+    modernName: "Pencader Hundred, near Newark, Delaware, USA",
+    region: "North America",
+    lat: 39.63,
+    lng: -75.77,
+    significance: "minor",
+    events: [
+      {
+        year: 1701,
+        title: "Welsh Baptists Settle the Welsh Tract",
+        description:
+          "A Baptist congregation from Pembrokeshire in Wales, formed in 1701 before it sailed, emigrates and settles in the Welsh Tract in what is now Delaware. It keeps its confession and church order, and it later joined the Philadelphia Association, so the Welsh Baptist stream feeds directly into American Baptist life.",
+        figure: null,
+        source: "Wikipedia, Welsh Tract Baptist Church (1701 formation and emigration). The Welsh home church is not named here because sources differ in spelling.",
+      },
+    ],
+  },
+  {
+    id: "philadelphia",
+    name: "Philadelphia Baptist Association",
+    modernName: "Philadelphia, Pennsylvania, USA",
+    region: "North America",
+    lat: 39.95,
+    lng: -75.17,
+    significance: "major",
+    events: [
+      {
+        year: 1707,
+        title: "The Philadelphia Association Forms",
+        description:
+          "Five churches (Pennepek, Middletown, Piscataway, Cohansey and Welsh Tract) form the Philadelphia Baptist Association in 1707, the first Baptist association in America. Like the English associations it gives its churches mutual counsel and a common voice.",
+        figure: null,
+        source: "Wikipedia, Philadelphia Baptist Association (1707, five founding churches).",
+      },
+      {
+        year: 1742,
+        title: "The Philadelphia Confession Adopted",
+        description:
+          "In 1742 the Association adopts the Philadelphia Confession of Faith, a Baptist confession that follows the Second London Confession of 1689 closely and adds two chapters, on singing psalms and hymns and on the laying on of hands. Benjamin Franklin printed an edition in 1743. This carries the 1689 Confession to the American churches.",
+        figure: null,
+        source: "Wikipedia, Philadelphia Confession of Faith (adopted 1742; Franklin edition 1743; two chapters added).",
+      },
+    ],
+  },
+  {
+    id: "charleston",
+    name: "Charleston Baptist Association",
+    modernName: "Charleston, South Carolina, USA",
+    region: "North America",
+    lat: 32.78,
+    lng: -79.93,
+    significance: "moderate",
+    events: [
+      {
+        year: 1751,
+        title: "The Charleston Association Founded",
+        description:
+          "Churches meeting at Charleston, South Carolina, form the Charleston Baptist Association on 21 October 1751, the first Baptist association in the South. It adopted the Philadelphia Confession, which in turn rests on the 1689 Confession.",
+        figure: null,
+        source: "Wikipedia, Charleston Baptist Association (21 October 1751). The adoption of the Philadelphia Confession is stated in general terms.",
+      },
+    ],
+  },
+  {
+    id: "serampore",
+    name: "Serampore Mission",
+    modernName: "Serampore, West Bengal, India",
+    region: "India",
+    lat: 22.75,
+    lng: 88.34,
+    significance: "major",
+    events: [
+      {
+        year: 1800,
+        title: "Carey, Marshman and Ward Settle at Serampore",
+        description:
+          "William Carey, Joshua Marshman and William Ward settle at the Danish settlement of Serampore in January 1800, where they have the protection of the Danish governor. They set up a press, a school and a church, and translate and print the Scriptures in many languages. It is the first fruit of the mission that began at Kettering in 1792.",
+        figure: "William Carey",
+        source: "Wikipedia, Serampore Mission and William Carey (January 1800, Danish settlement). 'Many languages' is kept general.",
       },
     ],
   },
@@ -1067,6 +1298,41 @@ export const figures = [
     role: "The Prince of Preachers",
     bio: "Converted at 15. Pastor of New Park Street from 1854 and of the Metropolitan Tabernacle from 1861. Founded a college, an orphanage and a colportage association. Led the Downgrade Controversy against theological liberalism.",
   },
+  {
+    id: "john-myles",
+    name: "John Myles",
+    years: "c. 1621–1683",
+    role: "Founder of the Ilston church in Wales",
+    bio: "Welsh Baptist minister who gathered the Ilston church in 1649 and kept its minute book. After the Restoration he sailed to America and helped found a Baptist church in Massachusetts. He died in 1683.",
+  },
+  {
+    id: "abraham-booth",
+    name: "Abraham Booth",
+    years: "1734–1806",
+    role: "Pastor in Goodman's Fields; author",
+    bio: "Self-taught former weaver, author of 'The Reign of Grace' (1768) and 'Pedobaptism Examined' (1784). Pastor of the Prescot Street church from 1769 until his death.",
+  },
+  {
+    id: "benjamin-beddome",
+    name: "Benjamin Beddome",
+    years: "1717–1795",
+    role: "Pastor and hymn writer at Bourton-on-the-Water",
+    bio: "Trained at Bristol and ordained at Bourton in 1743, where he served until his death. Wrote hundreds of hymns to follow his sermons.",
+  },
+  {
+    id: "john-sutcliff",
+    name: "John Sutcliff",
+    years: "1752–1814",
+    role: "Pastor at Olney; promoter of the Call to Prayer",
+    bio: "Pastor at Olney from 1775. Proposed the 1784 monthly prayer call and stood with Fuller and Carey when the Baptist Missionary Society began.",
+  },
+  {
+    id: "elias-keach",
+    name: "Elias Keach",
+    years: "1667–1699",
+    role: "Pastor at Pennepek; son of Benjamin Keach",
+    bio: "Son of Benjamin Keach. Went to Pennsylvania in 1686, was converted there and gathered the Pennepek church in 1688, then helped other churches in the colonies.",
+  },
 ];
 
 // Source references linked to locations (shown in the About panel and README)
@@ -1087,6 +1353,9 @@ export const sources = [
 
 // Stop numbers: within each era, events are numbered in chronological order.
 (() => {
+  // the era tag always follows the year (see eraForYear), so a card can never disagree with its date
+  // each event gets a stable id (location:year) that the Spanish text is keyed by
+  locations.forEach((loc) => loc.events.forEach((evt) => { evt.era = eraForYear(evt.year); evt.id = evt.id || `${loc.id}:${evt.year}`; }));
   [1, 2, 3, 4].forEach((eraId) => {
     const evts = [];
     locations.forEach((loc, li) => loc.events.forEach((evt, ei) => { if (evt.era === eraId) evts.push({ evt, li, ei }); }));
@@ -1136,6 +1405,7 @@ export const timeline = (() => {
         title: evt.title,
         description: evt.description,
         figure: evt.figure,
+        id: evt.id,
         locationId: loc.id,
         locationName: loc.name,
         era: evt.era,

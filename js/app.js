@@ -9,6 +9,8 @@
 const ARCGIS_API_KEY = "";
 
 import { eras, locations, routes, figures, timeline, eraIndex, locationIndex, YEAR_MIN, YEAR_MAX, eraForYear } from "./data.js";
+import { chapters, confessionLinks, confessionIntro } from "./confession.js";
+import { families, today } from "./lineage.js";
 import {
   lang, setLang, t, eraText, locationText, eventText, figureText, storedLang,
   allLocationText, allEventText, allFigureText,
@@ -35,9 +37,9 @@ function focusEl(el) {
 const locName = (loc) => locationText(loc.id, "name") || loc.name;
 const locModern = (loc) => locationText(loc.id, "modernName") || loc.modernName;
 const locRegion = (loc) => locationText(loc.id, "region") || loc.region;
-const evtTitle = (loc, evt) => eventText(loc.id, evt.year, "title") || evt.title;
-const evtDesc = (loc, evt) => eventText(loc.id, evt.year, "description") || evt.description;
-const evtSource = (loc, evt) => eventText(loc.id, evt.year, "source") || evt.source || "";
+const evtTitle = (loc, evt) => eventText(evt.id, "title") || evt.title;
+const evtDesc = (loc, evt) => eventText(evt.id, "description") || evt.description;
+const evtSource = (loc, evt) => eventText(evt.id, "source") || evt.source || "";
 const figField = (fig, field) => figureText(fig.id, field) || fig[field];
 
 // ============================================================
@@ -125,6 +127,8 @@ function fillInfoModal() {
         <li>${t("infoHow3")}</li>
         <li>${t("infoHow4")}</li>
         <li>${t("infoHow5")}</li>
+        <li>${t("infoHow6")}</li>
+        <li>${t("infoHow7")}</li>
       </ul>
     </div>
     <div class="info-features">
@@ -207,6 +211,17 @@ function applyTranslations() {
   $("donateBtnText").textContent = t("btnSupport");
   $("langBtnText").textContent = lang === "en" ? "ES" : "EN";
   $("locationsBtnText").textContent = t("btnLocations");
+  $("confessionBtnText").textContent = t("btnConfession");
+  $("lineageBtnText").textContent = t("btnLineage");
+  $("btnConfession").setAttribute("label", t("confessionTitle"));
+  $("btnConfession").setAttribute("title", t("confessionTitle"));
+  $("skipLink").textContent = t("skipLink");
+  $("appH1").textContent = `${t("appTitle")} — ${t("appSubtitle")}`;
+  $("geojsonBtnText").textContent = t("exportGeojson");
+  $("printBtnText").textContent = t("exportPrint");
+  $("btnGeojson").setAttribute("title", t("exportGeojsonTip"));
+  $("confessionPanelTitle").textContent = t("confessionTitle");
+  $("lineagePanelTitle").textContent = t("lineageTitle");
 
   // calcite buttons take an accessible name from `label`
   $("btnTimeline").setAttribute("label", t("timelineTitle"));
@@ -220,7 +235,7 @@ function applyTranslations() {
   $("btnLang").setAttribute("title", t("langLabel"));
   $("btnInfo").setAttribute("label", t("infoLabel"));
   $("btnInfo").setAttribute("title", t("infoLabel"));
-  ["closeTimeline", "closeFigures", "closeLocations", "closeSheet"].forEach((id) => $(id).setAttribute("label", t("closeLabel")));
+  ["closeTimeline", "closeFigures", "closeLocations", "closeConfession", "closeLineage", "closeSheet"].forEach((id) => $(id).setAttribute("label", t("closeLabel")));
   ["closeInfo", "closeDonate"].forEach((id) => $(id).setAttribute("aria-label", t("closeLabel")));
 
   document.querySelectorAll(".journey-chip").forEach((chip) => {
@@ -409,15 +424,29 @@ async function initMap() {
   const view = new MapView({
     container: "viewDiv",
     map,
-    center: [-1.5, 52.0],
-    zoom: 6,
-    constraints: { minZoom: 5, maxZoom: 14 },
+    center: [-1.5, 52.3],
+    zoom: window.innerWidth < 768 ? 6 : 7,
+    // the Esri gray tiles end at level 13, so zooming further would only stretch them
+    constraints: { minZoom: 2, maxZoom: 13 },
     popup: { autoOpenEnabled: false },
     ui: { components: ["zoom"] },
     navigation: { mouseWheelZoomEnabled: true, browserTouchPanEnabled: true },
   });
 
   view.ui.move("zoom", "bottom-right");
+
+  // Regions: the home view fits the places in Britain; the others jump to the Atlantic coast and India
+  const REGIONS = {
+    uk: { key: "regionUK", box: { xmin: -5.2, ymin: 50.7, xmax: 1.6, ymax: 53.6 } },
+    america: { key: "regionAmerica", box: { xmin: -82, ymin: 31.5, xmax: -73, ymax: 41.2 } },
+    india: { key: "regionIndia", box: { xmin: 86, ymin: 21, xmax: 90.6, ymax: 24.5 } },
+    all: { key: "regionAll", box: { xmin: -90, ymin: 15, xmax: 100, ymax: 58 } },
+  };
+  function goRegion(id, ms = 800) {
+    const r = REGIONS[id] || REGIONS.uk;
+    view.goTo({ ...r.box, spatialReference: { wkid: 4326 } }, goOpts(ms));
+  }
+  const goHome = (ms) => goRegion("uk", ms);
 
   // Drawing helpers
   const getEraColor = (eraId) => eraIndex[eraId]?.color || [150, 150, 150];
@@ -519,8 +548,8 @@ async function initMap() {
       const screenPt = view.toScreen(new Point({ longitude: c.lng, latitude: c.lat }));
       if (!screenPt) return false;
       const charWidth = c.fontSize * 0.55;
-      const w = c.text.length * charWidth + 12;
-      const h = c.fontSize + 6;
+      const w = c.text.length * charWidth + 18;
+      const h = c.fontSize + 9;
       const box = { x: screenPt.x - w / 2, y: screenPt.y - c.yoffset - h, w, h };
       const overlaps = placed.some((p) =>
         box.x < p.x + p.w && box.x + box.w > p.x && box.y < p.y + p.h && box.y + box.h > p.y);
@@ -639,7 +668,7 @@ async function initMap() {
   // ============================================================
   // Panels
   // ============================================================
-  const PANEL_BUTTONS = { timelinePanel: "btnTimeline", figuresPanel: "btnFigures", locationsPanel: "btnLocations" };
+  const PANEL_BUTTONS = { timelinePanel: "btnTimeline", figuresPanel: "btnFigures", locationsPanel: "btnLocations", confessionPanel: "btnConfession", lineagePanel: "btnLineage" };
   const panelReturn = {};
 
   function togglePanel(panelId, show, opts = {}) {
@@ -651,7 +680,7 @@ async function initMap() {
       panel.classList.remove("hidden");
       $(PANEL_BUTTONS[panelId])?.setAttribute("aria-expanded", "true");
       if (!opts.quiet) {
-        setTimeout(() => focusEl(panel.querySelector("[data-focus], .list-item, .timeline-item, .figure-card") || panel.querySelector("calcite-button")), 40);
+        setTimeout(() => focusEl(panel.querySelector("[data-focus], .list-item, .timeline-item, .figure-card, .chap-head, .fam button") || panel.querySelector("calcite-button")), 40);
       }
     } else {
       if (panel.classList.contains("hidden")) return;
@@ -671,6 +700,10 @@ async function initMap() {
   $("btnTimeline").addEventListener("click", () => togglePanel("timelinePanel"));
   $("btnFigures").addEventListener("click", () => togglePanel("figuresPanel"));
   $("btnLocations").addEventListener("click", () => togglePanel("locationsPanel"));
+  $("btnConfession").addEventListener("click", () => togglePanel("confessionPanel"));
+  $("btnLineage").addEventListener("click", () => togglePanel("lineagePanel"));
+  $("closeConfession").addEventListener("click", () => togglePanel("confessionPanel", false));
+  $("closeLineage").addEventListener("click", () => togglePanel("lineagePanel", false));
   $("closeTimeline").addEventListener("click", () => togglePanel("timelinePanel", false));
   $("closeFigures").addEventListener("click", () => togglePanel("figuresPanel", false));
   $("closeLocations").addEventListener("click", () => togglePanel("locationsPanel", false));
@@ -760,6 +793,120 @@ async function initMap() {
     });
   }
 
+  // Confession explorer: 32 chapters, each expands to a summary, key texts and a comparison
+  const refUrl = (ref) => `https://ref.ly/${encodeURIComponent(ref)};${lang === "es" ? "rvr60" : "niv"}`;
+  const esc = (x) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const L = (obj) => (lang === "es" ? obj.es : obj.en);
+
+  function buildConfessionPanel() {
+    const content = $("confessionContent");
+    const open = new Set([...content.querySelectorAll(".chap-head[aria-expanded='true']")].map((b) => b.dataset.n));
+    content.innerHTML = `<p class="panel-note">${esc(L(confessionIntro))}</p>` + chapters.map((c) => {
+      const isOpen = open.has(String(c.n));
+      const places = (c.places || []).filter((id) => locationIndex[id]);
+      return `
+      <div class="chap">
+        <button type="button" class="chap-head" data-n="${c.n}" aria-expanded="${isOpen}" aria-controls="chap-${c.n}">
+          <span class="chap-num">${c.n}</span><span>${esc(lang === "es" ? c.es : c.en)}</span>
+        </button>
+        <div class="chap-body" id="chap-${c.n}" role="region" aria-label="${esc(t("chapterWord"))} ${c.n}"${isOpen ? "" : " hidden"}>
+          <p>${esc(lang === "es" ? c.sumEs : c.sumEn)}</p>
+          <h4>${esc(t("refsLabel"))}</h4>
+          <p>${c.refs.map((r) => `<a href="${refUrl(r)}" target="_blank" rel="noopener">${esc(r)}</a>`).join(" · ")}</p>
+          <h4>${esc(t("cmpLabel"))}</h4>
+          <p class="chap-compare">${esc(L(c.cmp))}</p>
+          <p><b>${esc(t("wcfLabel"))}:</b> ${c.wcf ? `${esc(t("chapterWord"))} ${c.wcf}` : esc(t("wcfNone"))} · <b>${esc(t("savoyLabel"))}:</b> ${esc(t("chapterWord"))} ${c.n} (${esc(t("savoySame"))})</p>
+          ${places.length ? `<h4>${esc(t("placesLabel"))}</h4><div class="chap-places">${places.map((id) => `<button type="button" class="tool-btn" data-place="${id}">${esc(locName(locationIndex[id]))}</button>`).join("")}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("") + `<p class="panel-note"><b>${esc(t("fullTextLabel"))}:</b>
+      <a href="${confessionLinks.full}" target="_blank" rel="noopener" style="color:var(--gold-light)">${esc(t("fullText1689"))}</a> ·
+      <a href="${confessionLinks.wcf}" target="_blank" rel="noopener" style="color:var(--gold-light)">${esc(t("fullTextWcf"))}</a> ·
+      <a href="${confessionLinks.savoy}" target="_blank" rel="noopener" style="color:var(--gold-light)">${esc(t("fullTextSavoy"))}</a></p>`;
+    content.querySelectorAll(".chap-head").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const body = $(btn.getAttribute("aria-controls"));
+        const show = btn.getAttribute("aria-expanded") !== "true";
+        btn.setAttribute("aria-expanded", String(show));
+        body.hidden = !show;
+      });
+    });
+    content.querySelectorAll("[data-place]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        togglePanel("confessionPanel", false, { noReturn: true });
+        selectLocation(btn.dataset.place, { zoom: true });
+      });
+    });
+  }
+
+  // Lineage: church families followed through their pastors
+  function buildLineagePanel() {
+    const content = $("lineageContent");
+    content.innerHTML = `<p class="panel-note">${esc(t("lineageNote"))}</p>` + families.map((f) => `
+      <section class="fam" aria-label="${esc(L(f).title)}">
+        <h4>${esc(L(f).title)}</h4>
+        <p>${esc(L(f).intro)}</p>
+        <ol>${f.steps.map((st) => {
+          const loc = st.place && locationIndex[st.place];
+          const label = lang === "es" ? st.es : st.en;
+          const nm = loc ? `<button type="button" class="place-link" data-place="${st.place}">${esc(label)}</button>` : esc(label);
+          return `<li><b>${esc(st.years)}</b> · ${nm}<small>${esc(lang === "es" ? st.noteEs : st.noteEn)}</small></li>`;
+        }).join("")}</ol>
+      </section>`).join("");
+    content.querySelectorAll("[data-place]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        togglePanel("lineagePanel", false, { noReturn: true });
+        selectLocation(btn.dataset.place, { zoom: true });
+      });
+    });
+  }
+
+  // Region buttons and export tools live at the top of the Places panel
+  function buildRegionButtons() {
+    const box = $("regionBtns");
+    box.innerHTML = Object.entries(REGIONS).map(([id, r]) => `<button type="button" class="tool-btn" data-region="${id}">${esc(t(r.key))}</button>`).join("");
+    box.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => goRegion(b.dataset.region)));
+  }
+
+  function download(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // GeoJSON of the places currently shown (respects the era and year filters)
+  $("btnGeojson").addEventListener("click", () => {
+    const feats = locations.filter(locVisible).map((loc) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [loc.lng, loc.lat] },
+      properties: {
+        id: loc.id, name: loc.name, modernName: loc.modernName, region: loc.region, significance: loc.significance,
+        events: locEvents(loc).map((e) => ({ year: e.year, era: e.era, title: e.title, figure: e.figure || null, source: e.source || null })),
+      },
+    }));
+    download("1689-heritage-trail.geojson", JSON.stringify({ type: "FeatureCollection", name: "1689 Heritage Trail", features: feats }, null, 1), "application/geo+json");
+    toast(`${feats.length} ${t("typePlace").toLowerCase()}`);
+  });
+
+  // Printable itinerary: the stops in the app's order for the current filters
+  $("btnPrint").addEventListener("click", () => {
+    buildStopList();
+    const sheet = $("printSheet");
+    sheet.innerHTML = `<h1>${esc(t("printTitle"))}</h1><p class="when">${esc(t("printNote"))}</p>` + orderedStops.map((loc, i) => `
+      <div class="stop">
+        <h2>${i + 1}. ${esc(locName(loc))}</h2>
+        <p class="when">${esc(locModern(loc))} · ${esc(locRegion(loc))}</p>
+        ${locEvents(loc).map((e) => `<p><b>${e.year}</b> · ${esc(evtTitle(loc, e))}. ${esc(evtDesc(loc, e))}</p>${evtSource(loc, e) ? `<p class="src">${esc(t("sourceLabel"))} ${esc(evtSource(loc, e))}</p>` : ""}`).join("")}
+        ${today[loc.id] ? `<p class="src"><b>${esc(t("todayLabel"))}:</b> ${esc(L(today[loc.id]))}</p>` : ""}
+      </div>`).join("");
+    document.body.classList.add("printing");
+    const done = () => { document.body.classList.remove("printing"); window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    window.print();
+  });
+
   // ============================================================
   // Bottom sheet (location details)
   // ============================================================
@@ -768,6 +915,8 @@ async function initMap() {
   const sheetModernName = $("sheetModernName");
   const sheetEvents = $("sheetEvents");
   const sheetHandle = $("sheetHandle");
+  const setSheetHidden = (hide) => { bottomSheet.toggleAttribute("inert", hide); bottomSheet.setAttribute("aria-hidden", String(hide)); };
+  setSheetHidden(true);
 
   function buildStopList() {
     const stops = [];
@@ -832,7 +981,11 @@ async function initMap() {
       `;
     }).join("") : `<p class="event-description">${t("noEventsYet")}</p>`;
 
+    const note = today[loc.id];
+    if (note) sheetEvents.insertAdjacentHTML("beforeend", `<div class="today"><b>${esc(t("todayLabel"))}:</b> ${esc(L(note))} <i>${esc(t("todayNote"))}</i></div>`);
+
     updateNavButtons();
+    setSheetHidden(false);
     bottomSheet.classList.add("open");
     $("sheetContent").scrollTop = 0;
     drawLocations();
@@ -843,6 +996,7 @@ async function initMap() {
   function closeBottomSheet(opts = {}) {
     if (!bottomSheet.classList.contains("open")) { selectedLocation = null; return; }
     bottomSheet.classList.remove("open");
+    setSheetHidden(true);
     selectedLocation = null;
     drawLocations();
     syncUrl();
@@ -931,12 +1085,14 @@ async function initMap() {
       const eraLocations = locations.filter(locVisible);
       if (eraLocations.length > 0) zoomToLocations(eraLocations);
     } else {
-      view.goTo({ center: [-1.5, 52.0], zoom: 6 }, goOpts(800));
+      goHome(800);
     }
   }
   chips.forEach((chip) => chip.addEventListener("click", () => setEra(chip.dataset.era)));
 
-  function zoomToLocations(locs) {
+  function zoomToLocations(all) {
+    const inBritain = all.filter((l) => l.lng > -6 && l.lng < 2.5 && l.lat > 50 && l.lat < 56);
+    const locs = inBritain.length >= 3 ? inBritain : all;
     const lngs = locs.map((l) => l.lng);
     const lats = locs.map((l) => l.lat);
     view.goTo({
@@ -1020,6 +1176,8 @@ async function initMap() {
     togglePanel("timelinePanel", false, { quiet: true });
     togglePanel("figuresPanel", false, { quiet: true });
     togglePanel("locationsPanel", false, { quiet: true });
+    togglePanel("confessionPanel", false, { quiet: true });
+    togglePanel("lineagePanel", false, { quiet: true });
     if (!yearOn() || state.year >= YEAR_MAX) { lastYear = YEAR_MIN - 1; setYear(YEAR_MIN, { force: true }); }
     playing = true;
     setPlayingUi(true);
@@ -1075,6 +1233,9 @@ async function initMap() {
     applyTranslations();
     buildTimelinePanel();
     buildFiguresPanel();
+    buildConfessionPanel();
+    buildLineagePanel();
+    buildRegionButtons();
     refresh();
     updateYearUi();
     setPlayingUi(playing);
@@ -1123,7 +1284,7 @@ async function initMap() {
       loc.events.forEach((evt) => {
         searchIndex.push({
           type: "event", loc, evt,
-          text: fold(`${evt.title} ${evt.description} ${evt.year} ${evt.figure || ""} ${loc.name} ${allEventText(loc.id, evt.year)}`),
+          text: fold(`${evt.title} ${evt.description} ${evt.year} ${evt.figure || ""} ${loc.name} ${allEventText(evt.id)}`),
         });
       });
     });
@@ -1265,6 +1426,7 @@ async function initMap() {
     lastSig = visibleSignature();
     updateYearUi();
     refresh();
+    if (state.era === "all" && !init.loc) goHome(0);
     if (state.era !== "all") {
       const eraLocations = locations.filter(locVisible);
       if (eraLocations.length) zoomToLocations(eraLocations);
@@ -1285,6 +1447,9 @@ async function initMap() {
 
   buildTimelinePanel();
   buildFiguresPanel();
+  buildConfessionPanel();
+  buildLineagePanel();
+  buildRegionButtons();
   buildSearchIndex();
   setPlayingUi(false);
 }
@@ -1295,3 +1460,8 @@ async function initMap() {
 const rememberedLang = storedLang();
 if (rememberedLang) { setLang(rememberedLang); beginApp(); }
 else { setTimeout(() => document.querySelector(".lang-btn")?.focus(), 50); }
+
+// Offline support (https only; the map SDK and tiles still come from the network)
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}

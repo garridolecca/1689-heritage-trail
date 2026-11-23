@@ -1,0 +1,11 @@
+{
+  "name": "1689 Heritage Trail",
+  "short_name": "1689 Trail",
+  "description": "Interactive map of Particular Baptist history, centered on the 1689 Confession.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1a1119",
+  "theme_color": "#1a1119",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

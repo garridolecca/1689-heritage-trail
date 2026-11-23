@@ -38,6 +38,7 @@ export const eventsEs = {
   "devonshire-square:1644": {
     title: "Firma de la Primera Confesión de Londres",
     description: "Siete iglesias Bautistas Particulares de Londres, entre ellas Devonshire Square, firman la Primera Confesión de Fe Bautista de Londres (1LCF). La confesión distingue a los Bautistas Particulares de los Bautistas Generales y de los temidos anabaptistas de Münster, afirmando la doctrina calvinista con el bautismo de creyentes.",
+    source: "Wikipedia, Primera Confesión de Fe de Londres (1644, siete iglesias de Londres); la comparación con Münster sigue el propio prefacio de la Confesión.",
   },
   "great-st-helens:1646": {
     title: "Hanserd Knollys reúne una iglesia",
@@ -72,6 +73,7 @@ export const eventsEs = {
   "newgate-prison:1683": {
     title: "Hercules Collins encarcelado",
     description: "Hercules Collins, pastor de la iglesia de Wapping, es encarcelado en Newgate de 1683 a 1684 por culto inconformista, parte de la ofensiva más amplia contra los disidentes bajo Carlos II. Sigue escribiendo durante su encarcelamiento.",
+    source: "Wikipedia, Hercules Collins (encarcelado en Newgate 1683–1684).",
   },
   "cawkwell:1598": {
     title: "Nace Hanserd Knollys",
@@ -119,8 +121,8 @@ export const eventsEs = {
     source: "Wikipedia, Hanserd Knollys (muerto el 19 de septiembre de 1691, en su nonagésimo tercer año).",
   },
   "llanwenarth:1652": {
-    title: "La comunidad bautista galesa más antigua que sobrevive",
-    description: "Llanwenarth se funda en 1652 como la comunidad bautista continua más antigua de Gales. El edificio actual de la capilla data de 1695 (algunas fuentes dicen 1696), remodelado después, y es la capilla bautista más antigua de Gales, aún en pie en el pueblo de Govilon. La historia de la propia iglesia dice que allí se formó la Unión Bautista de Gales en 1866.",
+    title: "Llanwenarth: una temprana comunidad bautista galesa",
+    description: "Llanwenarth se funda en 1652 y es una de las comunidades bautistas continuas más antiguas de Gales; Ilston (1649) y Olchon (tradicionalmente 1633) tienen fechas anteriores, de modo que «la más antigua» es discutido. El edificio actual de la capilla data de 1695 (algunas fuentes dicen 1696), remodelado después, y suele llamarse el edificio de capilla bautista más antiguo de Gales, aún en pie en el pueblo de Govilon. La historia de la propia iglesia dice que allí se formó la Unión Bautista de Gales en 1866.",
     source: "Wikipedia y Coflein (construida en 1695); historia de la iglesia de Llanwenarth. Se eliminó la afirmación anterior de una reunión de asociación allí en 1700.",
   },
   "hitchin:1673": {
@@ -134,9 +136,9 @@ export const eventsEs = {
     source: "Joshua Thomas, History of the Baptist Association in Wales; artículo del Journal of Ecclesiastical History sobre los Bautistas Particulares 1644–1660. Se eliminó la lista anterior de iglesias por no estar verificada.",
   },
   "abingdon:1652": {
-    title: "Comienza la Asociación de Abingdon",
-    description: "La Asociación de Abingdon de iglesias Bautistas Particulares, que reúne iglesias de Berkshire, Oxfordshire, Buckinghamshire, Hertfordshire, Bedfordshire y Hampshire, comienza su vida en octubre de 1652. Asociaciones como esta ofrecían apoyo mutuo, rendición de cuentas doctrinal y testimonio colectivo durante los años de persecución.",
-    source: "Registros de la Baptist Historical Society (B. R. White, The Abingdon Association). Se eliminó la afirmación de «cinco asociaciones regionales en la década de 1650».",
+    title: "Se forma la Asociación de Berkshire",
+    description: "El 8 de octubre de 1652 iglesias Bautistas Particulares de Berkshire y de los condados vecinos se reúnen y forman una asociación de apoyo mutuo, responsabilidad doctrinal y testimonio compartido. Es la precursora del organismo conocido después como la Asociación de Abingdon, cuyas reuniones en Abingdon se datan desde 1656 aproximadamente. Asociaciones como esta sostuvieron a las iglesias en los años de persecución.",
+    source: "B. R. White, The Abingdon Association; Baptist Historical Society. Corregido: 1652 corresponde a la Asociación de Berkshire; las reuniones de Abingdon comienzan hacia 1656 (véase más abajo). Se eliminó la afirmación de «cinco asociaciones regionales en la década de 1650».",
   },
   "knocklas:1617": {
     title: "Nace Vavasor Powell",
@@ -228,6 +230,86 @@ export const eventsEs = {
     description: "Benjamin Keach nace el 29 de febrero de 1640 en Stoke Hammond, Buckinghamshire. Comienza a predicar a los 18 años y ministra en Winslow antes de que la persecución lo lleve a Londres, donde llega a ser uno de los pastores Bautistas Particulares más importantes del siglo XVII. Su congregación de Horsleydown es un antepasado directo del Tabernáculo Metropolitano de Spurgeon.",
     source: "Wikipedia, Benjamin Keach; Metropolitan Tabernacle.",
   },
+  "ilston:1649": {
+    title: "John Myles reúne la iglesia de Ilston",
+    description: "John Myles, junto con Thomas Proud, reúne una iglesia bautista en Ilston, en la península de Gower, en 1649, descrita habitualmente como la primera iglesia bautista de Gales. Se conserva su libro de actas, el Ilston Book, que registra bautismos, disciplina eclesiástica y el crecimiento de la obra bautista en el sur de Gales. Tras la Restauración, Myles se marchó a América, donde ayudó a fundar una iglesia bautista en Massachusetts.",
+    source: "Wikipedia, John Myles e Ilston; el Ilston Book. «La primera de Gales» es la descripción habitual y se discute: Olchon (tradicionalmente 1633) se considera anterior.",
+  },
+  "little-prescot:1769": {
+    title: "Abraham Booth es llamado a Prescot Street",
+    description: "Abraham Booth, antiguo tejedor autodidacta y autor de «The Reign of Grace» (1768), es ordenado en 1769 como pastor de la iglesia Bautista Particular que se reunía en Little Prescot Street, Goodman's Fields, y sirve allí hasta su muerte en 1806. Defensor de la predicación de la gracia, escribió también «Pedobaptism Examined» (1784) y contribuyó a los inicios de la academia que llegó a ser el Stepney College.",
+    source: "Wikipedia, Abraham Booth (ordenado en 1769; murió en 1806). El vínculo con el Stepney College se afirma solo en términos generales.",
+  },
+  "bourton:1743": {
+    title: "Benjamin Beddome es ordenado en Bourton",
+    description: "Benjamin Beddome, nacido en 1717 y formado en la academia bautista de Bristol, es ordenado en 1743 como pastor en Bourton-on-the-Water, donde sirve hasta su muerte en 1795. Se le recuerda por los himnos que escribía para acompañar sus sermones, entre ellos «Let party names no more». Su largo ministerio muestra la vida estable de una iglesia Bautista Particular en los Cotswolds durante el siglo XVIII.",
+    source: "Wikipedia, Benjamin Beddome (ordenado en 1743; murió en 1795). La formación en Bristol se indica en términos generales.",
+  },
+  "olney:1784": {
+    title: "Sutcliff y el llamado a la oración",
+    description: "John Sutcliff, pastor en Olney desde 1775 hasta su muerte en 1814, propone en la reunión de la Asociación de Northamptonshire de 1784 una reunión mensual de oración por el avivamiento de la religión, inspirada en el «Humble Attempt» de Jonathan Edwards. Ocho años después, varios de los mismos hombres, entre ellos Sutcliff, estuvieron presentes cuando la Sociedad Misionera Bautista nació en Kettering.",
+    source: "Wikipedia, John Sutcliff (pastor en Olney 1775–1814; el llamado a la oración de 1784). La redacción sobre la reunión de la Asociación se mantiene general.",
+  },
+  "pennepek:1688": {
+    title: "Elias Keach y la iglesia de Pennepek",
+    description: "Elias Keach, hijo de Benjamin Keach de Londres, llega a la colonia de Pensilvania en 1686 y reúne en 1688 una iglesia bautista en Pennepek, hoy Lower Dublin. Suele contarse entre las iglesias bautistas más antiguas de las Colonias Centrales, y fue miembro fundador de la Asociación Bautista de Filadelfia.",
+    source: "Wikipedia, Elias Keach y Lower Dublin Baptist Church. «Entre las más antiguas» es la expresión habitual; la fecha de 1688 es la de la propia iglesia.",
+  },
+  "welsh-tract:1701": {
+    title: "Bautistas galeses se establecen en Welsh Tract",
+    description: "Una congregación bautista de Pembrokeshire, en Gales, formada en 1701 antes de zarpar, emigra y se establece en el Welsh Tract, en el actual Delaware. Conserva su confesión y su orden eclesial, y más tarde se unió a la Asociación de Filadelfia, de modo que la corriente bautista galesa desemboca directamente en la vida bautista norteamericana.",
+    source: "Wikipedia, Welsh Tract Baptist Church (formación y emigración en 1701). No se nombra aquí la iglesia galesa de origen porque las fuentes varían en la grafía.",
+  },
+  "philadelphia:1707": {
+    title: "Se forma la Asociación de Filadelfia",
+    description: "Cinco iglesias (Pennepek, Middletown, Piscataway, Cohansey y Welsh Tract) forman en 1707 la Asociación Bautista de Filadelfia, la primera asociación bautista de América. Como las asociaciones inglesas, ofrece a sus iglesias consejo mutuo y una voz común.",
+    source: "Wikipedia, Philadelphia Baptist Association (1707, cinco iglesias fundadoras).",
+  },
+  "philadelphia:1742": {
+    title: "Se adopta la Confesión de Filadelfia",
+    description: "En 1742 la Asociación adopta la Confesión de Fe de Filadelfia, una confesión bautista que sigue de cerca la Segunda Confesión de Londres de 1689 y añade dos capítulos, sobre el canto de salmos e himnos y sobre la imposición de manos. Benjamin Franklin imprimió una edición en 1743. Así la Confesión de 1689 llega a las iglesias norteamericanas.",
+    source: "Wikipedia, Philadelphia Confession of Faith (adoptada en 1742; edición de Franklin en 1743; dos capítulos añadidos).",
+  },
+  "charleston:1751": {
+    title: "Se funda la Asociación de Charleston",
+    description: "Iglesias reunidas en Charleston, Carolina del Sur, forman la Asociación Bautista de Charleston el 21 de octubre de 1751, la primera asociación bautista del Sur. Adoptó la Confesión de Filadelfia, que a su vez se apoya en la Confesión de 1689.",
+    source: "Wikipedia, Charleston Baptist Association (21 de octubre de 1751). La adopción de la Confesión de Filadelfia se indica en términos generales.",
+  },
+  "serampore:1800": {
+    title: "Carey, Marshman y Ward se establecen en Serampore",
+    description: "William Carey, Joshua Marshman y William Ward se establecen en enero de 1800 en la colonia danesa de Serampore, donde cuentan con la protección del gobernador danés. Instalan una imprenta, una escuela y una iglesia, y traducen e imprimen las Escrituras en muchas lenguas. Es el primer fruto de la misión que comenzó en Kettering en 1792.",
+    source: "Wikipedia, Serampore Mission y William Carey (enero de 1800, colonia danesa). «Muchas lenguas» se mantiene en términos generales.",
+  },
+  "westminster:1662": {
+    title: "El Acta de Uniformidad y la Gran Expulsión",
+    description: "El Acta de Uniformidad (1662) exige que todo ministro use el Libro de Oración Común y haya sido ordenado por un obispo. El día de San Bartolomé, el 24 de agosto de 1662, unos dos mil clérigos que no se conforman son expulsados de sus cargos. Junto con el Acta de Corporaciones (1661), el Acta de Conventículos (1664) y el Acta de las Cinco Millas (1665) forma el Código Clarendon, que empuja a los bautistas y otros disidentes a reuniones secretas, multas y prisión.",
+    source: "Wikipedia, Act of Uniformity 1662 y Gran Expulsión (unos 2.000 ministros; 24 de agosto de 1662). La cifra es el número redondo habitual.",
+  },
+  "westminster:1672": {
+    title: "Declaración de Indulgencia",
+    description: "El 15 de marzo de 1672 Carlos II emite una Declaración de Indulgencia que suspende las leyes penales contra los disidentes y permite lugares de reunión con licencia. Muchas congregaciones bautistas obtienen licencia para predicadores y casas. El Parlamento obliga al rey a retirarla en 1673 y aprueba el Acta de Prueba, de modo que el alivio es breve.",
+    source: "Wikipedia, Declaración de Indulgencia (1672) y Acta de Prueba 1673. No se da el número de licencias bautistas porque las fuentes difieren.",
+  },
+  "new-park-street:1856": {
+    title: "Spurgeon funda el Colegio de Pastores",
+    description: "Spurgeon comienza a preparar a un joven para el ministerio en 1855, y hacia 1856 la obra se ha convertido en el Colegio de Pastores, sostenido por su congregación y por la venta de sus sermones. Forma a predicadores de orígenes humildes y continúa hoy como Spurgeon's College en Londres.",
+    source: "Wikipedia, Spurgeon's College (la formación comenzó en 1855; el Colegio se data en 1856). Se omiten los detalles del primer alumno.",
+  },
+  "broadmead-bristol:1720": {
+    title: "Foskett y la Academia de Bristol",
+    description: "Bernard Foskett se convierte en pastor de Broadmead en 1720 y asume también la dirección de la academia financiada por la escritura de Edward Terrill de 1679. Bajo su dirección la escuela forma una corriente de ministros bautistas para el oeste de Inglaterra y más allá, entre ellos Benjamin Beddome.",
+    source: "Wikipedia, Bristol Baptist College y Bernard Foskett (1720). La lista de alumnos se limita a un nombre bien atestiguado.",
+  },
+  "kettering:1815": {
+    title: "Andrew Fuller muere en Kettering",
+    description: "Andrew Fuller, pastor en Kettering desde 1782 y Secretario de la Sociedad Misionera Bautista desde su inicio, muere el 7 de mayo de 1815. Sus escritos, sobre todo «The Gospel Worthy of All Acceptation», dieron al movimiento misionero su teología: que el evangelio debe ofrecerse libremente a todos y que quienes lo oyen están obligados a creerlo.",
+    source: "Wikipedia, Andrew Fuller (murió el 7 de mayo de 1815).",
+  },
+  "abingdon:1656": {
+    title: "La Asociación de Abingdon se reúne",
+    description: "Iglesias de la región se reúnen en Abingdon en septiembre de 1656 y dan a la asociación el nombre por el que es más conocida. Sus cartas circulares de esta época muestran a iglesias Bautistas Particulares que cuidan de la doctrina y la disciplina unas de otras bajo la Commonwealth.",
+    source: "B. R. White, The Abingdon Association; Baptist Historical Society. Septiembre de 1656 es la fecha habitual de las reuniones de Abingdon.",
+  },
 };
 
 export const figuresEs = {
@@ -247,6 +329,11 @@ export const figuresEs = {
   "andrew-fuller": { years: "1754–1815", role: "Teólogo; Secretario de la Sociedad Misionera Bautista", bio: "Su «Gospel Worthy of All Acceptation» (1785) rompió el estancamiento hipercalvinista. Pastor en Soham (1775–1782) y Kettering (1782–1815). Cofundó la BMS en Kettering en 1792 y fue su Secretario hasta su muerte." },
   "william-carey": { years: "1761–1834", role: "Padre de las misiones modernas", bio: "Nacido en Paulerspury. Lingüista autodidacta. Publicó «An Enquiry» instando a la misión cristiana. Zarpó hacia la India en 1793. Tradujo la Biblia al bengalí, el sánscrito, el maratí y otras lenguas." },
   "charles-spurgeon": { years: "1834–1892", role: "El Príncipe de los predicadores", bio: "Convertido a los 15 años. Pastor de New Park Street desde 1854 y del Tabernáculo Metropolitano desde 1861. Fundó un colegio, un orfanato y una asociación de colportaje. Encabezó la controversia del Downgrade contra el liberalismo teológico." },
+  "john-myles": { years: "c. 1621–1683", role: "Fundador de la iglesia de Ilston en Gales", bio: "Ministro bautista galés que reunió la iglesia de Ilston en 1649 y llevó su libro de actas. Tras la Restauración zarpó hacia América y ayudó a fundar una iglesia bautista en Massachusetts. Murió en 1683." },
+  "abraham-booth": { years: "1734–1806", role: "Pastor en Goodman's Fields; autor", bio: "Antiguo tejedor autodidacta, autor de «The Reign of Grace» (1768) y «Pedobaptism Examined» (1784). Pastor de la iglesia de Prescot Street desde 1769 hasta su muerte." },
+  "benjamin-beddome": { years: "1717–1795", role: "Pastor y autor de himnos en Bourton-on-the-Water", bio: "Formado en Bristol y ordenado en Bourton en 1743, donde sirvió hasta su muerte. Escribió cientos de himnos para acompañar sus sermones." },
+  "john-sutcliff": { years: "1752–1814", role: "Pastor en Olney; promotor del llamado a la oración", bio: "Pastor en Olney desde 1775. Propuso el llamado mensual a la oración de 1784 y estuvo junto a Fuller y Carey cuando nació la Sociedad Misionera Bautista." },
+  "elias-keach": { years: "1667–1699", role: "Pastor en Pennepek; hijo de Benjamin Keach", bio: "Hijo de Benjamin Keach. Fue a Pensilvania en 1686, se convirtió allí y reunió la iglesia de Pennepek en 1688; después ayudó a otras iglesias de las colonias." },
 };
 
 export const eraDescriptionsEs = {
